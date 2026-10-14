@@ -15,7 +15,8 @@
     "test:stress": "node tests/stress.mjs",
     "test:v2": "node tests/v2-browser.mjs",
     "test:v3": "node tests/v3-browser.mjs",
-    "test:v4": "node tests/v4-browser.mjs"
+    "test:v4": "node tests/v4-browser.mjs",
+    "test:web": "node tests/web-release.mjs"
   },
   "engines": {
     "node": ">=20"

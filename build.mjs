@@ -8,6 +8,10 @@ for(const dir of ['music'])for(const file of await readdir(new URL('assets/'+dir
 let js='';
 for(const path of ['src/assets.js','src/music.js','src/core.js','src/render.js','src/app.js'])js+='\n'+(await read(path)).replace(/^import .*?;\s*$/gm,'').replace(/^export /gm,'');
 const manifest=`<script>globalThis.__ECHO_ASSETS__=${JSON.stringify(assets)};</script>`;
-html=html.replace('<link rel="stylesheet" href="/src/style.css">',`<style>${css}</style>`).replace('<script type="module" src="/src/app.js"></script>',`${manifest}<script type="module">\n${js.replaceAll('</script','<\\/script')}\n</script>`);
+const styled=html.replace('<link rel="stylesheet" href="/src/style.css">',`<style>${css}</style>`);
+const bundled=`<script type="module">\n${js.replaceAll('</script','<\\/script')}\n</script>`;
+const web=styled.replace('<script type="module" src="/src/app.js"></script>',bundled);
+html=styled.replace('<script type="module" src="/src/app.js"></script>',manifest+bundled);
 await writeFile(new URL('play.html',base),html);
-console.log(`Built standalone play.html (${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB), with ${Object.keys(assets).length} embedded licensed assets.`);
+await writeFile(new URL('web.html',base),web);
+console.log(`Built offline play.html (${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB) and lazy-music web.html (${Math.round(Buffer.byteLength(web)/1024)} KiB), ${Object.keys(assets).length} licensed tracks.`);

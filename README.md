@@ -41,7 +41,7 @@ DPS 是当前构筑的理论直击输出，不计暴击、穿透、爆炸、分�
 ## 下载与运行
 
 源码在 `codex/echo-drift-delivery`，线上发布产物在 `gh-pages`。
-下载 `release/echo-drift.zip`（GitHub 文件页 → Download raw file），解压后打开 `play.html` 离线游玩。完整音乐已内嵌，单文件约 48.4 MiB，首次打开需要加载，之后不请求外部素材。
+下载 `release/echo-drift.zip`（GitHub 文件页 → Download raw file），解压后打开 `play.html` 离线游玩。离线版完整音乐已内嵌，单文件约 48.4 MiB。在线 Pages 使用约 135 KiB 的独立页面，按需加载当前音乐，不必先下载整个曲库。
 
 浏览器限制本地 HTML 时，在解压目录执行 `npm start`，访问 http://localhost:4173/ 。仅运行游戏需 Node.js 20+，无需安装依赖。云环境目录：`/workspace/CodexGame1`。Pages 不依赖云端服务持续运行。
 
@@ -59,6 +59,7 @@ npm run test:v4
 npm run test:stress
 npm run build
 npm run test:offline
+npm run test:web
 npm run test:balance
 ENDLESS_UNTIL=28 node tests/simulate.mjs 42
 python3 tools/package.py

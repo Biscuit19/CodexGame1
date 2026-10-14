@@ -5,7 +5,7 @@ import shutil
 root = Path(__file__).resolve().parent.parent
 out = root / 'release'
 out.mkdir(exist_ok=True)
-files = ['play.html', 'index.html', 'server.mjs', 'build.mjs', 'package.json',
+files = ['play.html', 'web.html', 'index.html', 'server.mjs', 'build.mjs', 'package.json',
          'package-lock.json', 'README.md', 'TESTING.md', 'DEPLOYMENT.md',
          'ASSET_CREDITS.md', 'LICENSE']
 for folder in ['src', 'assets', 'tests', 'tools']:

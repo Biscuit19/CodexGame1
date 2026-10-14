@@ -27,6 +27,6 @@
 
 ## 发布检查
 
-`tools/package.py` 校验 ZIP、内嵌 HTML 与 23 首音频。Pages 的 index.html 与测试的 play.html 字节一致。网络策略限制云端直连 github.io，公开部署状态通过 GitHub Pages 构建记录确认，浏览器测试针对相同产物。
+`tools/package.py` 校验 ZIP、内嵌 HTML 与 23 首音频。在线版另构建约 135 KiB 的 web.html，音乐按需加载；已在模拟 /CodexGame1/ 项目子路径中验证常规与首领音乐播放，并确认不请求域名根目录资源。Pages 的 index.html 与测试的 web.html 字节一致，完整 assets 目录随站点发布。网络策略限制云端直连 github.io，公开部署状态通过 GitHub Pages 构建记录确认，浏览器测试针对相同产物。
 
 上述检查覆盖已列路径，不代表能够证明所有设备、操作和随机组合绝无缺陷。
