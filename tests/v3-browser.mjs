@@ -5,9 +5,9 @@ try{
  const p=await b.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.stack));
  await p.addInitScript(()=>{if(!localStorage.getItem('echo-v3-tested')){localStorage.setItem('echo-drift-settings-v1',JSON.stringify({volume:.65,musicVolume:.75,music:true}));localStorage.setItem('echo-v3-tested','yes');}});
  await p.goto('http://127.0.0.1:4173/?test=1');await p.click('[data-action="new"]');await p.click('[data-action="start"]');await p.click('[data-action="begin"]');
- await p.waitForFunction(()=>window.__ECHO__.soundtrack.channels.get('shoals')?.currentTime>.2);
+ await p.waitForFunction(()=>window.__ECHO__.soundtrack.channels.get(window.__ECHO__.soundtrack.current)?.currentTime>.2);
  assert.equal(await p.evaluate(()=>window.__ECHO__.settings.musicVolume),.45);
- await p.waitForTimeout(600);assert((await p.evaluate(()=>window.__ECHO__.soundtrack.channels.get('shoals').volume))<.13);
+ await p.waitForTimeout(600);assert((await p.evaluate(()=>window.__ECHO__.soundtrack.channels.get(window.__ECHO__.soundtrack.current).volume))<.13);
  // Observe a real Web Audio waveform, then the independent SFX mute.
  const levels=await p.evaluate(async()=>{const a=window.__ECHO__.audio,ctx=a.ctx,an=ctx.createAnalyser();an.fftSize=2048;a.master.connect(an);const data=new Float32Array(2048);async function peak(){let peak=0;for(let i=0;i<18;i++){await new Promise(r=>setTimeout(r,8));an.getFloatTimeDomainData(data);peak=Math.max(peak,...data.map(Math.abs));}return peak;}a.lastShot=0;a.sound('shoot','needle');const on=await peak();window.__ECHO__.settings.sfxVolume=0;a.update(.1);a.lastShot=0;a.sound('shoot','needle');const off=await peak();window.__ECHO__.settings.sfxVolume=1;a.update(.1);a.master.disconnect(an);return{on,off};});assert(levels.on>.02);assert(levels.off<.001);
  await p.evaluate(()=>{const a=window.__ECHO__,g=new a.Game(17);g.nextEvent=999;g.spawnClock=999;g.player.level=50;g.player.invuln=999;g.time=g.duration;g.spawnEnemy('shield',{x:1400,y:800,hp:100000,speed:0});a.setGame(g);});
