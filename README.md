@@ -1,9 +1,69 @@
-# 余响航线 · 在线版
+# 余响航线 · 狂潮更新 v2
 
-这是 GitHub Pages 发布分支。index.html 为无需外部依赖的完整游戏。
+单人 2D 俯视角射击肉鸽。移动、瞄准、折光冲刺与复刻自己行动的回声，在随机海域中挑战五座灯塔。
 
-源码与测试位于 codex/echo-drift-delivery 分支。
+**在线游玩：https://biscuit19.github.io/CodexGame1/**
 
-仓库 Settings → Pages 中使用 Deploy from a branch，选择 gh-pages 和 / (root)，保存后等待部署。
+建议电脑、鼠标和键盘，1280×800 或更高分辨率。若仍看到旧版，请 Ctrl+F5 刷新。v2 使用独立存档，旧版进度不迁移；存档保存在当前浏览器，清除网站数据会删除进度。
 
-站点地址：https://biscuit19.github.io/CodexGame1/
+## 本次更新
+
+- 敌人更快、刷新更密集，默认标准难度；可选轻松难度。
+- 15 个航段，前四段上限为 40、50、60、65 秒，后续逐步增加，任何一段不超过 150 秒。自动模拟的战斗时间约 22 分钟，加上选奖励与购物通常约 25–30 分钟。
+- 17 类敌人、随机强化词缀和 5 位首领：跳跃、冲锋、狙击、环绕射击、治疗、分裂、布雷、偷币等。
+- 10 类随机事件，包括有预警的单侧突袭、两侧夹击、雷区和限时悬赏。悬赏精英出现 35 秒，击败可获得星币及传奇宝箱，超时逃离。
+- 武器由枪型、元素、改件、稀有度组合生成；路线、遗物、敌群组成和掉落均随机。
+- 每三段一位首领。首领在航段中途出现；达到时间上限仍未击败会撤退，扣除部分星币且无首领奖励，流程不会卡住。通关结果记录实际击败数量。
+- 通关后可保留构筑进入无尽模式，敌人继续增强，每段仍至多 150 秒。
+- 中央星币商店与关间商店：治疗、永久强化当局伤害、救援、随机遗物和高级武器；还可付费刷新商品或升级奖励。
+- 更大字体、明确的敌人轮廓、精细免费授权角色素材；涨潮变蓝并增强波浪，退潮显露暖色浅滩。
+- 五个海域各用一首完整背景曲，首领、危险事件和无尽使用战斗音乐，支持淡入淡出及独立音量。
+
+## 操作
+
+| 操作 | 按键 |
+|---|---|
+| 移动 | WASD / 方向键 |
+| 瞄准、射击 | 鼠标移动、按住左键 |
+| 折光冲刺（短暂无敌） | Shift / 空格 |
+| 余响复写 | Q / 鼠标右键 |
+| 宝箱 / 附近商店 | E |
+| 中央商店（靠近后） | B |
+| 暂停 | Esc |
+| 查看构筑 | Tab |
+| 选择奖励 | 鼠标 / 数字 1、2、3 |
+
+回声复刻最近 4 秒的移动和射击。设置可开启自动射击、辅助瞄准、减少闪光和震动。音乐需点击开始后播放，符合浏览器自动播放限制。
+
+## 下载与运行
+
+源码在 `codex/echo-drift-delivery` 分支，Pages 产物在 `gh-pages` 分支。
+下载 `release/echo-drift.zip`（GitHub 文件页的 Download raw file），解压后打开 `play.html` 即可离线游玩。也可直接下载单文件 `play.html`。音乐与图片全部内嵌，因此单文件约 10.3 MiB。
+
+若浏览器限制本地 HTML，在解压目录执行：
+
+```bash
+npm start
+```
+
+访问 http://localhost:4173/ 。运行只需 Node.js 20+，无需安装依赖。云环境路径为 `/workspace/CodexGame1`；线上网站不依赖云环境服务是否运行。
+
+## 开发与验证
+
+```bash
+npm ci
+npm run check
+npm test
+npm start # 在另一个终端保持运行
+npm run test:browser
+npm run test:v2
+npm run test:stress
+npm run build
+npm run test:offline
+npm run test:balance
+python3 tools/package.py
+```
+
+浏览器测试需要 Chromium（默认 `/usr/bin/chromium`，可用 `CHROMIUM_PATH` 指定）。测试截图在 `test-results/`，不属于游戏素材，不打入成品包。详见 [TESTING.md](TESTING.md)。
+
+免费素材作者、原始地址、修改记录与许可见 [ASSET_CREDITS.md](ASSET_CREDITS.md)，游戏设置中也可查看。代码与素材的许可范围见 [LICENSE](LICENSE)。部署说明见 [DEPLOYMENT.md](DEPLOYMENT.md)。
