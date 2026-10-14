@@ -1,4 +1,6 @@
-export const VERSION=2;
+export const VERSION=3;
+export const BEACON_SECONDS=3.5;
+export const RANGED_TYPES=new Set(["spitter","sniper","spiral","orbiter","healer","miner","lancer","mimic","summoner"]);
 export const SECTOR_TIMES=[40,50,60,65,80,90,100,110,115,120,125,130,135,140,150];
 export const sectorDuration=n=>SECTOR_TIMES[n]||150;
 export const EVENT_NAMES={rain:'星雨漂流 · 星屑与修复落入海域',surge:'狂潮共振 · 敌群与射速同时增强',gravity:'失重海流 · 移动加速，敌弹减速',caravan:'漂流商队 · 靠近商店采购新货',elite:'悬赏猎场 · 35 秒内击败黄金精英',rescue:'无人信号 · 充能临时信标获得修复',invasion:'单侧突袭 · 预警方向将涌入大群敌人',pincer:'双翼夹击 · 两侧敌群即将合围',mines:'水雷漂流 · 躲开闪烁的爆破区域',hunt:'追猎时刻 · 高速追猎者进入战场'};
@@ -113,6 +115,7 @@ export class Game{
  get damageMult(){return(1+this.count('lens')*.16+this.count('crown')*.4+this.forgeLevel*.12)*(this.highTide?1+this.count('tide')*.35:1);}
  get speed(){return 235*(1+this.count('boots')*.1)*(this.activeEvent?.id==='gravity'?1.15:1);}
  get dashMax(){return 3.5*Math.pow(.82,this.count('dash'));}
+ get clearing(){return this.time>=this.duration;}
  get echoMax(){return 14*Math.pow(.9,this.count('echo'))*(this.route==='echo'?.72:1)*(this.weapon.mod==='echo'?.8:1);}
  setupSector(){
  this.time=0;this.duration=sectorDuration(this.sector);this.incursions=[];this.nextEvent=this.rng.int(10,15);this.eventIndex=0;this.activeEvent=null;this.spawnClock=.5;this.shop=this.makeShop();this.rewardRerolls=0;this.waveCount=0;this.bossSpawned=false;this.enemies=[];this.bullets=[];this.hazards=[];this.pickups=[];this.echoes=[];this.history=[];this.chests=[];this.effects=[];this.player.x=1100;this.player.y=800;this.player.invuln=3;this.player.dashTime=0;
@@ -138,7 +141,7 @@ export class Game{
  skipChoice(){if(this.mode!=='choice'||this.rewardKind!=='chest')return;this.player.coins+=20;this.mode='playing';this.emit('resume');}
  offerRoutes(){this.mode='choice';this.rewardKind='route';this.choices=this.rng.shuffle(ROUTES).slice(0,3).map(r=>({type:'route',id:r.id}));this.emit('choice');}
  finishSector(){
- if(this.mode!=='playing')return;
+ if(this.mode!=='playing'||this.enemies.some(e=>e.hp>0)||this.incursions.length)return;
  this.bullets=[];this.enemies=[];this.hazards=[];this.echoes=[];this.pickups=[];
  if(this.sector===14&&!this.endless){this.campaignCleared=true;this.mode='won';this.emit('win');return;}
  this.player.coins+=45;this.heal(20);if(this.route==='storm')this.pendingLevels++;
@@ -152,7 +155,7 @@ export class Game{
  this.choices=[{type:'weapon',weapon:rollWeapon(this.rng,this.sector,rarity)},...(c.type==='relic'||this.rng.next()<.35?this.relicChoices(1,c.type==='relic'?'epic':undefined):[{type:'coins',amount:60}]),{type:'heal',amount:65}];this.emit('choice');
  }
  spawnEnemy(type,opts={}){
- if(this.enemies.filter(e=>e.hp>0).length>=96&&!opts.boss){if(!opts.elite)return null;const expendable=this.enemies.find(e=>!e.boss&&!e.elite&&e.hp>0);if(expendable)expendable.hp=0;else return null;}
+ if(this.enemies.filter(e=>e.hp>0).length>=68&&!opts.boss){if(!opts.elite)return null;const expendable=this.enemies.find(e=>!e.boss&&!e.elite&&e.hp>0);if(expendable)expendable.hp=0;else return null;}
  const def=ENEMIES[type]||ENEMIES.drifter,p=this.player,angle=this.rng.next()*TAU;
  const mult=1+this.sector*.18+this.sector**2*.018+Math.max(0,this.sector-14)*.25;const x=clamp(p.x+Math.cos(angle)*this.rng.int(470,660),45,WORLD.w-45),y=clamp(p.y+Math.sin(angle)*this.rng.int(390,570),45,WORLD.h-45);
  const e={id:this.id++,type,x,y,r:def.r,hp:def.hp*mult,maxHp:def.hp*mult,speed:def.speed*(1+Math.min(24,this.sector)*.014)*(this.difficulty==='relaxed'?.9:1),damage:def.damage*(1+this.sector*.025),xp:def.xp,color:def.color,age:0,cd:this.rng.next()*2+1,phase:0,slow:0,burn:0,burnDmg:0,hit:0,vx:0,vy:0,...opts};
@@ -162,7 +165,7 @@ export class Game{
  this.enemies.push(e);return e;
  }
  spawnBoss(){
- this.bossSpawned=true;const act=Math.floor(this.sector/3)%5;this.enemies=this.enemies.filter(e=>e.age>0).slice(0,8);this.bullets=this.bullets.filter(b=>!b.enemy);this.hazards=[];
+ this.bossSpawned=true;const act=Math.floor(this.sector/3)%5;this.bullets=this.bullets.filter(b=>!b.enemy);this.hazards=[];
  const hp=(this.endless?180000:[4500,20000,50000,110000,180000][act])*(this.difficulty==='relaxed'?.85:1)*(1+Math.max(0,this.sector-14)*.12);
  const e=this.spawnEnemy('shield',{boss:true,bossKind:act,name:this.zone.boss,r:52+act*2,hp,maxHp:hp,x:1100,y:420,speed:85,damage:20+act*2,xp:150,cd:2.5,phase:0,color:this.zone.color});
  if(dist(e,this.player)<200){e.y=clamp(this.player.y-350,80,1520);if(dist(e,this.player)<200)e.x=clamp(this.player.x+350,80,2120);}
@@ -178,10 +181,10 @@ export class Game{
  if(id==='rescue')this.beacons.push({id:this.id++,x:clamp(p.x+180,100,2100),y:clamp(p.y-120,100,1500),charge:0,done:false,temporary:true});
  if(id==='invasion'||id==='pincer'){
  const dir=this.rng.int(0,3),dirs=id==='pincer'?[dir,(dir+2)%4]:[dir];
- for(const side of dirs){const a=side*Math.PI/2;this.incursions.push({id:this.id++,x:clamp(p.x+Math.cos(a)*560,65,2135),y:clamp(p.y+Math.sin(a)*450,65,1535),wait:2.7,count:9+Math.min(10,this.sector),side,type:this.rng.pick(['drifter','skitter','leaper','reaper'])});}
+ for(const side of dirs){const a=side*Math.PI/2;this.incursions.push({id:this.id++,x:clamp(p.x+Math.cos(a)*560,65,2135),y:clamp(p.y+Math.sin(a)*450,65,1535),wait:2.7,count:Math.round((9+Math.min(10,this.sector))*.7),side,type:this.rng.pick(['drifter','skitter','leaper','reaper'])});}
  }
  if(id==='mines')for(let i=0;i<7;i++){const a=this.rng.next()*TAU;this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+Math.cos(a)*(130+i*32),50,2150),y:clamp(p.y+Math.sin(a)*(130+i*32),50,1550),r:60,wait:2+i*.22,life:.45,damage:23,fired:false});}
- if(id==='hunt')for(let i=0;i<5+Math.floor(this.sector/3);i++)this.spawnEnemy('reaper');
+ if(id==='hunt')for(let i=0;i<Math.round((5+Math.floor(this.sector/3))*.7);i++)this.spawnEnemy('reaper');
  this.emit('event',{text:EVENT_NAMES[id]});
  }
  makeShop(sale=false){const relic=this.relicChoices(1)[0];return{sale,rerolls:0,rescueBuys:0,items:[{id:'repair',name:'应急修复',desc:'立即恢复 65 生命',cost:40,type:'heal',amount:65},
@@ -209,13 +212,14 @@ export class Game{
  this.incursions=this.incursions.filter(w=>!w.spawned);
  if(this.activeEvent){this.activeEvent.left-=dt;if(this.activeEvent.left<=0)this.activeEvent=null;}
  if(this.time>=this.nextEvent&&this.time<this.duration-6&&!this.boss){const forced=this.eventIndex===0&&this.sector===0?'invasion':undefined;this.eventIndex++;this.startEvent(forced);this.nextEvent=this.time+this.rng.int(17,27);}
- this.spawnClock-=dt;if(this.spawnClock<=0){const pool=['drifter','skitter',...this.composition];if(this.sector===0&&this.time<8)pool.splice(2);let count=2+Math.floor(this.sector/4)+(this.highTide?1:0)+(this.activeEvent?.id==='surge'?2:0);if(this.boss)count=Math.max(1,Math.floor(count/2));for(let i=0;i<count;i++)this.spawnEnemy(this.rng.pick(pool));this.spawnClock=(this.boss?2.6:1.22)*(this.route==='quiet'?1.12:1)*(this.difficulty==='relaxed'?1.2:1);}
+ if(this.clearing)return;
+ this.spawnClock-=dt;if(this.spawnClock<=0){const melee=this.composition.filter(t=>!RANGED_TYPES.has(t)),ranged=this.composition.filter(t=>RANGED_TYPES.has(t)),pool=['drifter','skitter',...melee,...melee,...melee];if(ranged.length&&this.rng.next()<(this.sector<3?.18:.28))pool.splice(0,pool.length,...ranged);if(this.sector===0&&this.time<8)pool.splice(2);let count=2+Math.floor(this.sector/4)+(this.highTide?1:0)+(this.activeEvent?.id==='surge'?2:0);if(this.boss)count=Math.max(1,Math.floor(count/2));for(let i=0;i<count;i++)this.spawnEnemy(this.rng.pick(pool));this.spawnClock=(this.boss?2.6:1.22)*(this.route==='quiet'?1.12:1)*(this.difficulty==='relaxed'?1.2:1)/.7;}
  }
  dash(input){const p=this.player;if(p.dashCD>0)return false;let x=input.mx,y=input.my;let l=Math.hypot(x,y);if(l<.1){x=Math.cos(p.angle);y=Math.sin(p.angle);l=1;}p.dx=x/l;p.dy=y/l;p.dashTime=.2;p.invuln=Math.max(p.invuln,.42);p.dashCD=this.dashMax;this.stats.dashes++;this.emit('sound',{name:'dash'});return true;}
  summonEcho(){
  const p=this.player;if(p.echoCD>0)return false;p.echoCD=this.echoMax;const n=1+this.count('binary');
  const recorded=this.history.map(h=>({...h}));for(let i=0;i<n;i++)this.echoes.push({x:p.x,y:p.y,originX:p.x+(i===1?55:0),originY:p.y,life:6+this.count('echo')*2,age:0,recorded,shotCD:0,angle:p.angle});
- this.stats.echoes++;this.heal(this.count('echoheart')*15);this.emit('sound',{name:'echo'});this.emit('toast',{text:'余响上线 · 复刻最近 4 秒的轨迹与射击'});return true;
+ this.stats.echoes++;this.heal(this.count('echoheart')*15);this.emit('sound',{name:'echo'});this.emit('toast',{text:'余响上线 · 复刻移动轨迹 · 自主锁定敌人射击'});return true;
  }
  fire(x,y,angle,echo=false,scale=1){
  if(this.bullets.length>550)return;
@@ -226,7 +230,7 @@ export class Game{
  }
  if(!echo){this.shots++;this.emit('sound',{name:'shoot',frame:w.id});if(this.count('triad')&&this.shots%3===0){for(let i=0;i<8;i++){let a=i*TAU/8;this.bullets.push({id:this.id++,x,y,px:x,py:y,vx:Math.cos(a)*480,vy:Math.sin(a)*480,r:4,damage:dmg*.45,life:.9,age:0,pierce:0,hitIds:[],element:w.el.id,color:w.el.color});}}}
  }
- enemyShot(e,angle,speed=180,damage=e.damage,r=5){if(this.bullets.length>650)return;this.bullets.push({id:this.id++,x:e.x,y:e.y,px:e.x,py:e.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r,damage,enemy:true,color:e.boss?'#f6be99':'#f0a9a3',life:5,age:0});}
+ enemyShot(e,angle,speed=180,damage=e.damage,r=5){if(this.bullets.filter(b=>b.enemy&&b.life>0).length>=80)return;this.bullets.push({id:this.id++,x:e.x,y:e.y,px:e.x,py:e.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r,damage,enemy:true,color:e.boss?'#f6be99':'#f0a9a3',life:3.8,age:0});}
  ring(e,n=10,speed=160,offset=0){for(let i=0;i<n;i++)this.enemyShot(e,i*TAU/n+offset,speed);}
  hurtPlayer(n){
  const p=this.player;if(p.invuln>0||this.mode!=='playing')return false;
@@ -253,7 +257,7 @@ export class Game{
  if(!noProc&&this.count('blast')&&this.rng.next()<.25*this.count('blast'))this.explode(e.x,e.y,85,24*this.damageMult);
  if(e.elite){this.player.coins+=120+this.sector*8;this.emit('toast',{text:'悬赏完成 · 获得星币与传说宝箱'});}if(e.elite)this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0});
  if(e.type==='splitter'){for(let i=0;i<3;i++)this.spawnEnemy('skitter',{x:e.x+Math.cos(i*TAU/3)*30,y:e.y+Math.sin(i*TAU/3)*30,hp:22,maxHp:22,r:11});}if(e.affix==='volatile')this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:65,wait:.8,life:.25,damage:15,fired:false});
- if(e.boss){this.bossKills++;this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'灯塔重燃 · 航线已恢复'});this.finishSector();}
+ if(e.boss){this.bossKills++;this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'灯塔重燃 · 航线已恢复'});this.time=Math.max(this.time,this.duration);if(!this.enemies.some(v=>v.hp>0)&&!this.incursions.length)this.finishSector();}
  }
  explode(x,y,r,damage){this.emit('burst',{x,y,color:'#efc19a',r});for(const e of [...this.enemies])if(e.hp>0&&Math.hypot(e.x-x,e.y-y)<r+e.r)this.hitEnemy(e,damage,{noProc:true});}
  updateEnemy(e,dt){
@@ -261,8 +265,8 @@ export class Game{
  const p=this.player;let dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,a=Math.atan2(dy,dx),speed=e.speed*(e.slow>0?.5:1)*(this.highTide?1.06:1);e.angle=a;e.cd-=dt;
  if(e.boss){this.updateBoss(e,dt,a,d);return;}
  let move=1;
- if(e.type==='spitter'||e.type==='sniper'||e.type==='spiral'){move=d<260?-.55:d>360?1:0;if(e.cd<=0){if(e.type==='spitter'){for(let j=-1;j<=1;j++)this.enemyShot(e,a+j*.17,225);e.cd=2.6;}if(e.type==='spiral'){this.ring(e,7,145,e.age);e.cd=3.8;}if(e.type==='sniper'){this.hazards.push({id:this.id++,type:'line',x:e.x,y:e.y,angle:a,length:1000,width:18,wait:1.2,life:.32,damage:e.damage+3,fired:false});e.cd=4.3;}}}
- if(e.type==='summoner'){move=d<360?-.3:.6;if(e.cd<=0){for(let i=0;i<2;i++)this.spawnEnemy('skitter',{x:clamp(e.x+this.rng.int(-40,40),25,2175),y:clamp(e.y+this.rng.int(-40,40),25,1575)});e.cd=7;}}
+ if(e.type==='spitter'||e.type==='sniper'||e.type==='spiral'){move=d<260?-.55:d>360?1:0;if(e.cd<=0){if(e.type==='spitter'){this.enemyShot(e,a,225);e.cd=3.4;}if(e.type==='spiral'){this.ring(e,4,145,e.age);e.cd=5;}if(e.type==='sniper'){this.hazards.push({id:this.id++,type:'line',x:e.x,y:e.y,angle:a,length:1000,width:18,wait:1.2,life:.32,damage:e.damage+3,fired:false});e.cd=4.3;}}}
+ if(e.type==='summoner'){move=d<360?-.3:.6;if(e.cd<=0&&!this.clearing){for(let i=0;i<2;i++)this.spawnEnemy('skitter',{x:clamp(e.x+this.rng.int(-40,40),25,2175),y:clamp(e.y+this.rng.int(-40,40),25,1575)});e.cd=7;}}
  if(e.type==='charger'){
  if(e.phase===0&&e.cd<=0){e.phase=1;e.wind=.8;e.chargeAngle=a;this.emit('warning',{x:e.x,y:e.y,angle:a});}
  if(e.phase===1){move=0;e.wind-=dt;if(e.wind<=0){e.phase=2;e.wind=.6;}}
@@ -276,26 +280,37 @@ export class Game{
  if(e.phase===2){move=0;e.x+=e.vx*dt;e.y+=e.vy*dt;e.wind-=dt;if(e.wind<=0){e.phase=0;e.cd=3.2;}}
  }
  if(e.type==='healer'){move=d<320?-.5:.65;if(e.cd<=0){for(const t of this.enemies)if(t!==e&&!t.boss&&t.hp>0&&dist(t,e)<230){t.hp=Math.min(t.maxHp,t.hp+22);this.emit('arc',{x:e.x,y:e.y,tx:t.x,ty:t.y});}this.enemyShot(e,a,190);e.cd=3;}}
- if(e.type==='orbiter'){const tangent=a+(e.id%2?1:-1)*1.15;dx=Math.cos(tangent)*d;dy=Math.sin(tangent)*d;if(e.cd<=0){for(let j=-1;j<=1;j++)this.enemyShot(e,a+j*.14,245);e.cd=2.2;}}
+ if(e.type==='orbiter'){const tangent=a+(e.id%2?1:-1)*1.15;dx=Math.cos(tangent)*d;dy=Math.sin(tangent)*d;if(e.cd<=0){for(let j of [-1,1])this.enemyShot(e,a+j*.12,225);e.cd=3.4;}}
  if(e.type==='miner'){move=d<210?-.8:1;if(e.cd<=0){this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:68,wait:2.1,life:2.8,damage:18,fired:false});e.cd=3.7;}}
  if(e.type==='reaper'){if(e.cd<=0){e.phase=1;e.wind=.55;e.chargeAngle=a;e.cd=3.4;}if(e.phase===1){move=0;e.wind-=dt;if(e.wind<=0){e.phase=2;e.wind=.4;}}if(e.phase===2){move=0;e.x+=Math.cos(e.chargeAngle)*440*dt;e.y+=Math.sin(e.chargeAngle)*440*dt;e.wind-=dt;if(e.wind<=0)e.phase=0;}}
  if(e.type==='lancer'){move=d<230?.15:1;if(e.cd<=0){this.hazards.push({id:this.id++,type:'line',x:e.x,y:e.y,angle:a,length:520,width:14,wait:.9,life:.2,damage:e.damage,fired:false});e.cd=2.8;}}
- if(e.type==='mimic'){move=d<260?-1:0;if(e.cd<=0){this.ring(e,6,200,e.age);e.cd=2.6;}if(d<60&&p.invuln<=0){const stolen=Math.min(12,p.coins);p.coins-=stolen;e.stolen=(e.stolen||0)+stolen;}}
+ if(e.type==='mimic'){move=d<260?-1:0;if(e.cd<=0){this.ring(e,4,180,e.age);e.cd=4;}if(d<60&&p.invuln<=0){const stolen=Math.min(12,p.coins);p.coins-=stolen;e.stolen=(e.stolen||0)+stolen;}}
  if(e.type==='skitter'){const wiggle=Math.sin(e.age*5+e.id)*.7;a+=wiggle;dx=Math.cos(a)*d;dy=Math.sin(a)*d;}
+ if(this.clearing&&RANGED_TYPES.has(e.type)){dx=p.x-e.x;dy=p.y-e.y;d=Math.hypot(dx,dy)||1;move=d>140?1:.15;}
  e.x=clamp(e.x+dx/d*speed*move*dt,25,2175);e.y=clamp(e.y+dy/d*speed*move*dt,25,1575);
  if(d<e.r+p.r)this.hurtPlayer(e.damage);
  }
  updateBoss(e,dt,a,d){
- const p=this.player;e.phase=e.hp/e.maxHp<.45?1:0;
- if(d>230){e.x+=Math.cos(a)*e.speed*dt;e.y+=Math.sin(a)*e.speed*dt;}else if(d<150){e.x-=Math.cos(a)*e.speed*dt;e.y-=Math.sin(a)*e.speed*dt;}
+ const p=this.player;e.phase=e.hp/e.maxHp<.45?1:0;const kind=e.bossKind;
+ e.motionCD=(e.motionCD??2.8)-dt;
+ if(!e.motion&&e.motionCD<=0){e.motion='windup';e.motionTime=.95;e.motionAngle=a;e.fromX=e.x;e.fromY=e.y;e.targetX=clamp(p.x,90,2110);e.targetY=clamp(p.y,90,1510);e.motionCD=6.5-e.phase;this.emit('sound',{name:'charge'});
+ if(kind===1||kind===2)this.hazards.push({id:this.id++,type:'circle',x:kind===2?e.x:e.targetX,y:kind===2?e.y:e.targetY,r:kind===2?155:100,wait:kind===2?.95:1.65,life:.3,damage:24,fired:false});}
+ if(e.motion==='windup'){e.motionTime-=dt;if(e.motionTime<=0){e.motion='strike';e.motionTime=.7;this.emit('burst',{x:e.x,y:e.y,r:55,color:e.color});}return;}
+ if(e.motion==='strike'){e.motionTime-=dt;const t=clamp(1-e.motionTime/.7,0,1);
+ if(kind===1){e.x=e.fromX+(e.targetX-e.fromX)*t;e.y=e.fromY+(e.targetY-e.fromY)*t;e.lift=Math.sin(t*Math.PI)*75;}
+ else if(kind!==2){const speed=kind===3?520:620;e.x=clamp(e.x+Math.cos(e.motionAngle)*speed*dt,75,2125);e.y=clamp(e.y+Math.sin(e.motionAngle)*speed*dt,75,1525);if(dist(e,p)<e.r+p.r)this.hurtPlayer(e.damage+5);}
+ if(e.motionTime<=0){e.motion='recover';e.motionTime=.65;e.lift=0;this.emit('sound',{name:'slam'});this.emit('burst',{x:e.x,y:e.y,r:kind===2?155:80,color:e.color});}return;}
+ if(e.motion==='recover'){e.motionTime-=dt;if(e.motionTime<=0)e.motion='';return;}
+ const tangent=Math.sin(e.age*.9+kind)*.65,forward=d>300?1:d<175?-.6:.15;
+ e.x=clamp(e.x+(Math.cos(a)*forward-Math.sin(a)*tangent)*e.speed*dt,75,2125);e.y=clamp(e.y+(Math.sin(a)*forward+Math.cos(a)*tangent)*e.speed*dt,75,1525);
  if(d<e.r+p.r)this.hurtPlayer(e.damage);
  if(e.cd>0)return;
  e.attack=(e.attack||0)+1;const k=e.bossKind;
- if(k===0){if(e.attack%2){this.ring(e,12+e.phase*4,135,e.age*.4);}else{for(let i=0;i<3;i++)this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+(i-1)*125,60,2140),y:p.y,r:78,wait:1.4,life:.35,damage:22,fired:false});}e.cd=2.6-e.phase*.4;}
- if(k===1){for(let j=0;j<5+e.phase*2;j++)this.enemyShot(e,a+(j-2-e.phase)*.2,170);if(e.attack%3===0)for(let i=0;i<3;i++)this.spawnEnemy('bomber',{x:clamp(e.x+Math.cos(i*TAU/3)*95,30,2170),y:clamp(e.y+Math.sin(i*TAU/3)*95,30,1570)});e.cd=2.2-e.phase*.4;}
- if(k===2){for(let i=0;i<3+e.phase;i++)this.hazards.push({id:this.id++,type:'line',x:e.x,y:e.y,angle:a+(i-1)*.45,length:1800,width:24,wait:1.35,life:.38,damage:24,fired:false});if(e.attack%3===0)this.ring(e,12,135);e.cd=3;}
- if(k===3){this.ring(e,14+e.phase*4,145,e.age);this.hazards.push({id:this.id++,type:'circle',x:p.x,y:p.y,r:95,wait:1.6,life:.4,damage:24,fired:false});if(e.attack%3===0){e.x=clamp(2200-e.x,150,2050);e.y=clamp(1600-e.y,150,1450);this.emit('burst',{x:e.x,y:e.y,color:e.color,r:80});}e.cd=2.5-e.phase*.4;}
- if(k===4){if(e.attack%3===0){for(let i=0;i<4;i++)this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+Math.cos(i*TAU/4)*115,60,2140),y:clamp(p.y+Math.sin(i*TAU/4)*115,60,1540),r:75,wait:1.5,life:.4,damage:26,fired:false});}else{this.ring(e,16+e.phase*4,140,e.age*.6);for(let j=-1;j<=1;j++)this.enemyShot(e,a+j*.15,215);}if(e.attack%5===0)this.spawnEnemy('spitter');e.cd=2.35-e.phase*.35;}
+ if(k===0){if(e.attack%2){this.ring(e,6+e.phase*2,135,e.age*.4);}else{for(let i=0;i<3;i++)this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+(i-1)*125,60,2140),y:p.y,r:78,wait:1.4,life:.35,damage:22,fired:false});}e.cd=2.6-e.phase*.4;}
+ if(k===1){for(let j=0;j<3+e.phase*2;j++)this.enemyShot(e,a+(j-1-e.phase)*.2,170);if(e.attack%3===0&&!this.clearing)for(let i=0;i<2;i++)this.spawnEnemy('bomber',{x:clamp(e.x+Math.cos(i*TAU/3)*95,30,2170),y:clamp(e.y+Math.sin(i*TAU/3)*95,30,1570)});e.cd=2.2-e.phase*.4;}
+ if(k===2){for(let i=0;i<3+e.phase;i++)this.hazards.push({id:this.id++,type:'line',x:e.x,y:e.y,angle:a+(i-1)*.45,length:1800,width:24,wait:1.35,life:.38,damage:24,fired:false});if(e.attack%3===0)this.ring(e,6,135);e.cd=3;}
+ if(k===3){this.ring(e,7+e.phase*2,145,e.age);this.hazards.push({id:this.id++,type:'circle',x:p.x,y:p.y,r:95,wait:1.6,life:.4,damage:24,fired:false});e.cd=2.5-e.phase*.4;}
+ if(k===4){if(e.attack%3===0){for(let i=0;i<4;i++)this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+Math.cos(i*TAU/4)*115,60,2140),y:clamp(p.y+Math.sin(i*TAU/4)*115,60,1540),r:75,wait:1.5,life:.4,damage:26,fired:false});}else{this.ring(e,8+e.phase*2,140,e.age*.6);for(let j=-1;j<=1;j++)this.enemyShot(e,a+j*.15,215);}if(e.attack%5===0&&!this.clearing)this.spawnEnemy('skitter');e.cd=2.35-e.phase*.35;}
  }
  updateBullets(dt){
  const p=this.player;for(const b of this.bullets){if(b.life<=0)continue;b.px=b.x;b.py=b.y;b.age+=dt;b.life-=dt;
@@ -310,7 +325,7 @@ export class Game{
  }
  update(dt,input=emptyInput()){
  if(this.mode!=='playing')return;dt=clamp(dt,0,.05);if(dt===0)return;
- const p=this.player;this.elapsed+=dt;this.time+=dt;p.angle=Math.atan2(input.ay||0,input.ax||.00001);p.invuln=Math.max(0,p.invuln-dt);p.dashCD=Math.max(0,p.dashCD-dt);p.echoCD=Math.max(0,p.echoCD-dt);p.shotCD-=dt;
+ const p=this.player;p.moving=Math.hypot(input.mx,input.my)>.1;p.walk=(p.walk||0)+(p.moving?dt:0);this.elapsed+=dt;this.time+=dt;p.angle=Math.atan2(input.ay||0,input.ax||.00001);p.invuln=Math.max(0,p.invuln-dt);p.dashCD=Math.max(0,p.dashCD-dt);p.echoCD=Math.max(0,p.echoCD-dt);p.shotCD-=dt;
  this.heal((.1+this.count('heart')*.22+(!this.highTide?this.count('tide')*.3:0))*dt);
  if(input.dash)this.dash(input);if(input.echo)this.summonEcho();if(input.interact){this.tryChest();if(this.mode!=='playing')return;}
  if(p.dashTime>0){p.x+=p.dx*1050*dt;p.y+=p.dy*1050*dt;p.dashTime-=dt;if(p.dashTime<=0&&this.count('capacitor')){this.bullets=this.bullets.filter(b=>!b.enemy||dist(b,p)>170);this.explode(p.x,p.y,145,55*this.count('capacitor')*this.damageMult);}}
@@ -318,7 +333,9 @@ export class Game{
  p.x=clamp(p.x,24,WORLD.w-24);p.y=clamp(p.y,24,WORLD.h-24);
  if(input.shoot&&p.shotCD<=0){this.fire(p.x,p.y,p.angle);p.shotCD=1/(weaponInfo(this.weapon).rate*(1+this.count('spring')*.12)*(this.activeEvent?.id==='surge'?1.35:1));}
  this.historyClock+=dt;if(this.historyClock>=.1){this.historyClock-=.1;this.history.push({x:p.x,y:p.y,angle:p.angle,shoot:!!input.shoot});if(this.history.length>40)this.history.shift();}
- for(const e of this.echoes){e.age+=dt;e.life-=dt;e.shotCD-=dt;const h=e.recorded[Math.floor(e.age*10)%Math.max(1,e.recorded.length)];if(h){const base=e.recorded[0];e.x=clamp(e.originX+h.x-base.x,20,2180);e.y=clamp(e.originY+h.y-base.y,20,1580);e.angle=h.angle;if(h.shoot&&e.shotCD<=0){this.fire(e.x,e.y,e.angle,true);e.shotCD=1/(weaponInfo(this.weapon).rate*(1+this.count('spring')*.12));}}else{e.angle=p.angle;if(input.shoot&&e.shotCD<=0){this.fire(e.x,e.y,e.angle,true);e.shotCD=1/weaponInfo(this.weapon).rate;}}}
+ for(const e of this.echoes){e.age+=dt;e.life-=dt;e.shotCD-=dt;const h=e.recorded[Math.floor(e.age*10)%Math.max(1,e.recorded.length)];if(h){const base=e.recorded[0];e.x=clamp(e.originX+h.x-base.x,20,2180);e.y=clamp(e.originY+h.y-base.y,20,1580);}
+ const target=this.enemies.filter(t=>t.hp>0&&dist(t,e)<800).sort((a,b)=>dist(a,e)-dist(b,e))[0];if(target){e.angle=Math.atan2(target.y-e.y,target.x-e.x);if(e.shotCD<=0){this.fire(e.x,e.y,e.angle,true);e.shotCD=1/(weaponInfo(this.weapon).rate*(1+this.count('spring')*.12));}}}
+
  this.echoes=this.echoes.filter(e=>e.life>0);
  this.updateDirector(dt);
  for(const e of [...this.enemies]){this.updateEnemy(e,dt);if(this.mode!=='playing')return;}
@@ -329,16 +346,16 @@ export class Game{
  this.hazards=this.hazards.filter(h=>h.life>0);if(this.mode!=='playing')return;
  for(const item of this.pickups){item.age+=dt;let d=dist(item,p),range=100+this.count('magnet')*65;if(d<range||item.age>24){item.x+=(p.x-item.x)/Math.max(1,d)*(310+item.age*5)*dt;item.y+=(p.y-item.y)/Math.max(1,d)*(310+item.age*5)*dt;}if(d<26){if(item.kind==='xp')this.gainXP(item.value);if(item.kind==='heal')this.heal(item.value);if(item.kind==='coin')p.coins+=Math.round(item.value*(1+this.count('luck')*.25)*(this.route==='treasure'?1.5:1));item.taken=true;}}
  this.pickups=this.pickups.filter(i=>!i.taken);if(this.pickups.length>220){let excess=this.pickups.splice(0,this.pickups.length-220);for(const i of excess){if(i.kind==='xp')this.gainXP(i.value);if(i.kind==='coin')p.coins+=i.value;}}
- for(const b of this.beacons)if(!b.done&&dist(b,p)<105){b.charge+=dt*(this.route==='echo'?1.5:1);if(b.charge>=8){b.done=true;this.stats.beacons++;this.gainXP(35+this.sector*4);p.coins+=25;this.heal(b.temporary?40:18);if(!b.temporary&&this.beacons.filter(v=>!v.temporary).every(v=>v.done))this.chests.push({id:this.id++,x:b.x+50,y:b.y,type:'supply',cost:0});this.emit('beacon',{x:b.x,y:b.y});this.emit('toast',{text:'信标点亮 · 获得星币、经验与修复；点亮全部信标可获物资箱'});this.emit('sound',{name:'beacon'});}}
+ for(const b of this.beacons)if(!b.done&&dist(b,p)<105){b.charge+=dt*(this.route==='echo'?1.5:1);if(b.charge>=BEACON_SECONDS){b.done=true;this.stats.beacons++;this.gainXP(35+this.sector*4);p.coins+=25;this.heal(b.temporary?40:18);if(!b.temporary&&this.beacons.filter(v=>!v.temporary).every(v=>v.done))this.chests.push({id:this.id++,x:b.x+50,y:b.y,type:'supply',cost:0});this.emit('beacon',{x:b.x,y:b.y});this.emit('toast',{text:'信标点亮 · 获得星币、经验与修复；点亮全部信标可获物资箱'});this.emit('sound',{name:'beacon'});}}
  this.satelliteClock-=dt;if(this.count('orbit')&&this.satelliteClock<=0){for(let i=0;i<this.count('orbit');i++){let a=this.elapsed*1.7+i*TAU/this.count('orbit'),x=p.x+Math.cos(a)*55,y=p.y+Math.sin(a)*55;let t=this.enemies.filter(e=>dist(e,p)<500).sort((a,b)=>dist(a,p)-dist(b,p))[0];if(t){this.bullets.push({id:this.id++,x,y,px:x,py:y,vx:Math.cos(Math.atan2(t.y-y,t.x-x))*620,vy:Math.sin(Math.atan2(t.y-y,t.x-x))*620,r:4,damage:20*this.damageMult,life:1,age:0,pierce:0,hitIds:[],element:'plain',color:'#f0dca7'});}}this.satelliteClock=.65;}
  this.blackholeClock-=dt;if(this.count('blackhole')&&this.blackholeClock<=0){const t=this.enemies.find(e=>dist(e,p)<550);if(t){this.explode(t.x,t.y,200,95*this.damageMult);for(const e of this.enemies)if(!e.boss&&dist(e,t)<250){e.x+=(t.x-e.x)*.55;e.y+=(t.y-e.y)*.55;}}this.blackholeClock=8;}
  if(this.sector%3===2&&!this.bossSpawned&&this.time>=this.duration*.48)this.spawnBoss();
- if(this.time>=this.duration){if(this.boss){this.missedBosses++;this.player.coins=Math.max(0,this.player.coins-30);this.emit('toast',{text:'潮汐封锁 · 守卫撤退，损失 30 星币与首领奖励'});}this.finishSector();return;}
+ if(this.clearing&&!this.enemies.some(e=>e.hp>0)&&!this.incursions.length){this.finishSector();return;}
  if(this.pendingLevels>0&&this.mode==='playing')this.offerLevel();
  }
  snapshot(){const o={};for(const k of Object.keys(this))if(!['events','effects','history'].includes(k))o[k]=this[k];o.rng={state:this.rng.state};return JSON.parse(JSON.stringify({version:VERSION,...o}));}
  static restore(data){
- if(!data||data.version!==VERSION||!Number.isInteger(data.sector)||data.sector<0||data.sector>100000||!data.player||!Number.isFinite(data.player.hp)||!data.weapon||!FRAMES.some(f=>f.id===data.weapon.frame)||!RARITIES[data.weapon.rarity]||!['playing','choice','shop'].includes(data.mode))throw new Error('存档格式不兼容或已损坏');
+ if(!data||![2,VERSION].includes(data.version)||!Number.isInteger(data.sector)||data.sector<0||data.sector>100000||!data.player||!Number.isFinite(data.player.hp)||!data.weapon||!FRAMES.some(f=>f.id===data.weapon.frame)||!RARITIES[data.weapon.rarity]||!['playing','choice','shop'].includes(data.mode))throw new Error('存档格式不兼容或已损坏');
  for(const key of ['enemies','bullets','pickups','hazards','echoes','beacons','chests','choices'])if(!Array.isArray(data[key]))throw new Error('存档缺少场景数据');
  if(!data.rng||!Number.isFinite(data.rng.state)||!Number.isFinite(data.time)||!Number.isFinite(data.elapsed)||!Number.isFinite(data.player.x)||!Number.isFinite(data.player.y)||!Number.isFinite(data.player.maxHp)||data.player.maxHp<=0||!data.relics||Object.entries(data.relics).some(([id,n])=>!RELICS.some(r=>r.id===id&&Number.isInteger(n)&&n>=0&&n<=r.max)))throw new Error('存档状态无效');
  const g=new Game(data.seed,data.difficulty);for(const k of Object.keys(g))if(k in data&&!['events','effects','history','rng'].includes(k))g[k]=data[k];g.rng=new RNG(1);g.rng.state=data.rng.state>>>0;g.events=[];g.effects=[];g.history=[];return g;

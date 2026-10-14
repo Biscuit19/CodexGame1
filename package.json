@@ -1,6 +1,6 @@
 {
   "name": "echo-drift",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "description": "\u4f59\u54cd\u822a\u7ebf \u2014 a complete single-player 2D roguelite shooter",
@@ -13,7 +13,8 @@
     "test:balance": "node tests/simulate.mjs",
     "test:offline": "node tests/offline.mjs",
     "test:stress": "node tests/stress.mjs",
-    "test:v2": "node tests/v2-browser.mjs"
+    "test:v2": "node tests/v2-browser.mjs",
+    "test:v3": "node tests/v3-browser.mjs"
   },
   "engines": {
     "node": ">=20"

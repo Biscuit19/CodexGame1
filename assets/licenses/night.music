@@ -1,7 +1,7 @@
 (supertux-music
-  (file "night.ogg")
+  (file "sunset.ogg")
   (authors "SnugglyBun")
   (license "CC-BY-SA 4.0")
-  (loop-begin 2.912)
-  (loop-at 72.727)
+  (loop-begin 34.912)
+  (loop-at 104.727)
 )

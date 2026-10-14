@@ -1,185 +1,6 @@
 {
-  "art": [
-    {
-      "asset": "hero",
-      "source": "https://github.com/game-icons/icons/blob/master/delapouite/diving-helmet.svg",
-      "author": "delapouite",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "coat",
-      "source": "https://github.com/game-icons/icons/blob/master/delapouite/pirate-coat.svg",
-      "author": "delapouite",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "drifter",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/ghost.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "skitter",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/crab.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "spitter",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/angler-fish.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "charger",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/shark-jaws.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "shield",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/turtle.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "summoner",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/jellyfish.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "bomber",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/pirate-skull.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "sniper",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/eyestalk.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "spiral",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/octopus.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "leaper",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/frog.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "splitter",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/squid.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "healer",
-      "source": "https://github.com/game-icons/icons/blob/master/delapouite/mermaid.svg",
-      "author": "delapouite",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "orbiter",
-      "source": "https://github.com/game-icons/icons/blob/master/faithtoken/nautilus-shell.svg",
-      "author": "faithtoken",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "miner",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/sea-dragon.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "reaper",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/snake.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "lancer",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/sword-wound.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "mimic",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/treasure-map.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "boss0",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/angler-fish.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "boss1",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/octopus.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "boss2",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/robot-golem.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "boss3",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/squid-head.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    },
-    {
-      "asset": "boss4",
-      "source": "https://github.com/game-icons/icons/blob/master/lorc/sea-dragon.svg",
-      "author": "lorc",
-      "license": "CC BY 3.0",
-      "changes": "Removed background; added color gradient and dark contour."
-    }
-  ],
+  "art": [],
   "music": [
-    {
-      "asset": "shoals",
-      "title": "Underwater",
-      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/underwater.ogg",
-      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/underwater.music",
-      "author": "SnugglyBun",
-      "license": "CC BY-SA 4.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
-      "original_sha256": "1e754e0cf7b8acefc36c61d822e8f37efbe829d0a48e070449a4525576a4a923"
-    },
     {
       "asset": "garden",
       "title": "Tropical Breeze",
@@ -187,18 +8,8 @@
       "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/tropical/tropicalbreeze.music",
       "author": "Flan",
       "license": "CC BY-SA 4.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
+      "changes": "Full track transcoded to 96 kbps MP3; loudness normalized to -18 LUFS / -2 dBTP. No composition changes.",
       "original_sha256": "ab0f63042aec2b0484c0accd45a2bc5497e2ba0590a758b8ec504def9681a3ac"
-    },
-    {
-      "asset": "dock",
-      "title": "March of the Malevolent",
-      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/forest/march_of_the_malevolent.ogg",
-      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/forest/march_of_the_malevolent.music",
-      "author": "Servalot; Marek \"Wansti\" Moeckel",
-      "license": "CC BY-SA 4.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
-      "original_sha256": "9dd35b88e41d863b5a4504903ed0d6ea37e4f276392d23c539e3b092aedc6d91"
     },
     {
       "asset": "snow",
@@ -207,28 +18,38 @@
       "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/glacier.music",
       "author": "SnugglyBun",
       "license": "CC BY-SA 4.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
+      "changes": "Full track transcoded to 96 kbps MP3; loudness normalized to -18 LUFS / -2 dBTP. No composition changes.",
       "original_sha256": "f0385b9533112299952ace30cedf7b9af8b36756f159eb69e8da46a595d7b7c1"
     },
     {
-      "asset": "night",
-      "title": "Night",
-      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/night.ogg",
-      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/night.music",
+      "asset": "shoals",
+      "title": "Midday",
+      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/midday.ogg",
+      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/midday.music",
       "author": "SnugglyBun",
       "license": "CC BY-SA 4.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
-      "original_sha256": "86279ad750230cb137943e9388032ca6454f3a4f288d500988716b51ceeea5a6"
+      "changes": "Full track transcoded to 96 kbps MP3; loudness normalized to -18 LUFS / -2 dBTP. No composition changes.",
+      "original_sha256": "ab6c57edceb2ef9b22a27972034a0b60d602dd0a4552d78f99a35cf9a477f233"
+    },
+    {
+      "asset": "night",
+      "title": "Sunset",
+      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/sunset.ogg",
+      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/sunset.music",
+      "author": "SnugglyBun",
+      "license": "CC BY-SA 4.0",
+      "changes": "Full track transcoded to 96 kbps MP3; loudness normalized to -18 LUFS / -2 dBTP. No composition changes.",
+      "original_sha256": "2e4020b2f8a9a85340c48e3be0984005a17577f4c24de482005411d92df31732"
     },
     {
       "asset": "battle",
-      "title": "Battle Theme",
-      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/misc/battle_theme.ogg",
-      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/misc/battle_theme.music",
-      "author": "remaxim",
-      "license": "CC BY-SA 3.0",
-      "changes": "Full track transcoded from Ogg Vorbis to 96 kbps MP3. No musical arrangement changes.",
-      "original_sha256": "9f3b12fdca8d98fe93397e3e66d31b1258678f3be6b15213f5bfbc8af1c3aae9"
+      "title": "Sky Level",
+      "source": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/skylevel.ogg",
+      "metadata": "https://raw.githubusercontent.com/SuperTux/supertux/master/data/music/antarctic/skylevel.music",
+      "author": "SnugglyBun",
+      "license": "CC BY-SA 4.0",
+      "changes": "Full track transcoded to 96 kbps MP3; loudness normalized to -18 LUFS / -2 dBTP. No composition changes.",
+      "original_sha256": "86efdea66b7a8de43c62da0c30c0b6a2f536ad1bd7149491581403bcecd0a8d1"
     }
   ]
 }
