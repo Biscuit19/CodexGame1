@@ -2,7 +2,8 @@
 
 - 网站：https://biscuit19.github.io/CodexGame1/
 - 托管：GitHub Pages，发布源 gh-pages 分支的根目录。
-- 发布内容：index.html（由源码分支的 play.html 原样复制）、.nojekyll。
+- 发布内容：index.html（由源码分支的 play.html 原样复制）、.nojekyll、素材署名与许可。
+- v2：狂潮更新，30 个授权素材内嵌于约 10.3 MiB 的单文件中。
 - 首次部署：GitHub Actions 的 pages-build-deployment #1，状态 Success。
 - 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38535620185
 

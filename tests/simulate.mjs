@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 const seeds=process.argv.slice(2).map(Number);if(!seeds.length)seeds.push(42,1234,71829);
 const ranking=['heart','lens','orbit','spring','chain','pierce','crown','binary','triad','shell','coat','glass','focus','blast','fire','magnet','echoheart','blackhole','phoenix','tide','boots','supply','echo','frost','capacitor','dash','luck','thorns'];
 function scoreWeapon(w){const i=weaponInfo(w);return i.damage*i.count*i.rate*(i.homing?1.15:1)*(i.blast?1.4:1)*(i.pierce?1.2:1)*(i.count>1?.78:1);}
-for(const seed of seeds){let g=new Game(seed),steps=0,lastSector=-1,bossStart=0,bossTimes=[],maxEnemies=0,maxBullets=0,restoreCount=0;let anchor=null;
+for(const seed of seeds){let g=new Game(seed,process.env.DIFFICULTY||'normal'),steps=0,lastSector=-1,bossStart=0,bossTimes=[],maxEnemies=0,maxBullets=0,restoreCount=0;let anchor=null;
  while(g.mode!=='won'&&g.mode!=='dead'&&steps<110000){
-  if(g.mode==='choice'){
+  if(g.mode==='choice'){if(g.rewardKind==='route'){g.openShop();if(g.player.hp<g.player.maxHp-30)g.buy('repair');if(g.player.rescues<2)g.buy('rescue');g.buy('forge');g.buy('relic');const w=g.shop.items.find(i=>i.id==='weapon');if(scoreWeapon(w.weapon)>scoreWeapon(g.weapon)*1.12)g.buy('weapon');g.closeShop();}
    let best=0,bestScore=-Infinity;
    g.choices.forEach((c,i)=>{let score=0;if(c.type==='relic')score=100-ranking.indexOf(c.id)*2+(g.count(c.id)?-3:0);if(c.type==='weapon')score=scoreWeapon(c.weapon)>scoreWeapon(g.weapon)*1.08?105:0;if(c.type==='heal')score=g.player.hp/g.player.maxHp<.45?130:10;if(c.type==='coins')score=50;if(c.type==='route')score={quiet:100,treasure:70,echo:90,storm:10}[c.id];if(score>bestScore){bestScore=score;best=i;}});g.choose(best);g.drain();continue;
   }
@@ -20,13 +20,13 @@ for(const seed of seeds){let g=new Game(seed),steps=0,lastSector=-1,bossStart=0,
   for(const h of g.hazards){if(h.type==='circle'&&dist(h,p)<h.r+60){mx+=(p.x-h.x+5)/Math.max(1,dist(h,p))*2;my+=(p.y-h.y+5)/Math.max(1,dist(h,p))*2;}}
   if(p.x<100)mx+=2;if(p.x>2100)mx-=2;if(p.y<100)my+=2;if(p.y>1500)my-=2;
   const magnitude=Math.hypot(mx,my);if(magnitude>1){mx/=magnitude;my/=magnitude;}
-  const aim=nearest||{x:p.x+1,y:p.y};
+  const aim=(g.boss&&(!nearest||dist(nearest,p)>160)?g.boss:nearest)||{x:p.x+1,y:p.y};
   g.update(.05,{mx,my,ax:aim.x-p.x,ay:aim.y-p.y,shoot:!!nearest,dash:!!nearest&&dist(nearest,p)<85,echo:enemies.length>=3||!!g.boss,interact:g.chests.some(c=>dist(c,p)<85&&c.cost<=p.coins)});g.drain();steps++;
   maxEnemies=Math.max(maxEnemies,g.enemies.length);maxBullets=Math.max(maxBullets,g.bullets.length);
-  assert(Number.isFinite(g.player.hp)&&Number.isFinite(g.player.x));assert(g.enemies.length<=65);
+  assert(Number.isFinite(g.player.hp)&&Number.isFinite(g.player.x));assert(g.enemies.length<=100);
   if(steps%10000===0&&['playing','choice'].includes(g.mode)){g=Game.restore(g.snapshot());restoreCount++;}
  }
  if(g.mode==='won'&&bossStart)bossTimes.push(Number((g.elapsed-bossStart).toFixed(1)));
- console.log('RESULT '+JSON.stringify({seed,mode:g.mode,time:Math.round(g.elapsed),minutes:(g.elapsed/60).toFixed(1),bossTimes,level:g.player.level,kills:g.kills,rescues:g.player.rescues,hits:g.stats.hitsTaken,maxEnemies,maxBullets,restoreCount,relics:g.relics}));
+ console.log('RESULT '+JSON.stringify({seed,mode:g.mode,time:Math.round(g.elapsed),minutes:(g.elapsed/60).toFixed(1),bossTimes,bossKills:g.bossKills,missedBosses:g.missedBosses,forge:g.forgeLevel,coins:g.player.coins,level:g.player.level,kills:g.kills,rescues:g.player.rescues,hits:g.stats.hitsTaken,maxEnemies,maxBullets,restoreCount,relics:g.relics}));
  if(g.mode!=='won')process.exitCode=1;
 }

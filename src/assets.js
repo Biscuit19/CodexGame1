@@ -1,0 +1,4 @@
+export const assetUrl=path=>globalThis.__ECHO_ASSETS__?.[path]||new URL('../'+path,import.meta.url).href;
+export const SPRITES=['hero','coat','drifter','skitter','spitter','charger','shield','summoner','bomber','sniper','spiral','leaper','splitter','healer','orbiter','miner','reaper','lancer','mimic','boss0','boss1','boss2','boss3','boss4'];
+export const MUSIC_TRACKS={shoals:{title:'Underwater',author:'SnugglyBun'},garden:{title:'Tropical Breeze',author:'Flan'},dock:{title:'March of the Malevolent',author:'Servalot / Wansti'},snow:{title:'Glacier',author:'SnugglyBun'},night:{title:'Night',author:'SnugglyBun'},battle:{title:'Battle Theme',author:'remaxim'}};
+export function musicFor(game){if(!game)return 'night';if(game.boss||game.endless)return 'battle';if(game.activeEvent&&['invasion','pincer','elite','surge','hunt','mines'].includes(game.activeEvent.id))return 'battle';return ['shoals','garden','dock','snow','night'][Math.floor(game.sector/3)%5];}
