@@ -1,0 +1,17 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.stack));await page.goto('http://127.0.0.1:4173/?test=1');
+ const frameStats=[];
+ for(let act=0;act<5;act++){
+  await page.evaluate(async(act)=>{const api=window.__ECHO__,{RELICS,FRAMES}=await import('/src/core.js'),g=new api.Game(92+act);g.sector=act*3+2;g.setupSector();g.time=185;g.spawnBoss();g.player.invuln=999;g.player.x=1100;g.player.y=800;for(const r of RELICS)g.addRelic(r.id);g.weapon={frame:FRAMES[act*2].id,element:'shock',mod:'split',rarity:'legendary',tier:4,name:'压力测试武器'};for(let i=0;i<45;i++)g.spawnEnemy(['drifter','skitter','spitter','charger','shield','summoner','bomber','sniper','spiral'][i%9],{x:1100+Math.cos(i*2.4)*400,y:800+Math.sin(i*2.4)*300});g.summonEcho();api.settings.autoFire=true;api.settings.autoAim=true;api.setGame(g);window.frameSamples=[];window.lastSample=performance.now();window.collectFrames=true;window.frameToken=(window.frameToken||0)+1;const token=window.frameToken;function sample(t){if(!window.collectFrames||window.frameToken!==token)return;window.frameSamples.push(t-window.lastSample);window.lastSample=t;requestAnimationFrame(sample);}requestAnimationFrame(sample);},act);
+  await page.waitForTimeout(1800);await page.screenshot({path:`test-results/sea-${act+1}.png`});frameStats.push(await page.evaluate(()=>{window.collectFrames=false;let a=window.frameSamples.slice(5);return{frames:a.length,meanMS:Math.round(a.reduce((a,b)=>a+b,0)/a.length)};}));
+ }
+ // Death and restart UI is reachable, and old save is removed.
+ await page.evaluate(()=>{const api=window.__ECHO__,g=api.game;g.mode='playing';g.pendingLevels=0;g.player.invuln=0;g.player.rescues=0;g.hurtPlayer(1e8);api.handleEvents();});await page.waitForFunction(()=>window.__ECHO__.screen==='dead');assert.equal(await page.evaluate(()=>localStorage.getItem('echo-drift-save-v1')),null);await page.click('[data-action="new"]');await page.click('[data-action="start"]');await page.click('[data-action="begin"]');await page.waitForFunction(()=>window.__ECHO__.game.time>.1);assert.equal(await page.evaluate(()=>window.__ECHO__.game.sector),0);
+ await page.keyboard.press('Escape');await page.click('[data-action="settings"]');await page.click('[data-setting="reduced"]');assert.equal(await page.evaluate(()=>window.__ECHO__.settings.reduced),true);await page.click('[data-action="back"]');await page.click('[data-action="resume"]');
+ // Follow a normal transition and let the next frame drain queued UI events.
+ await page.evaluate(()=>{const api=window.__ECHO__;api.game.pendingLevels=0;api.game.time=179.99;});await page.waitForSelector('[data-choice="0"]');await page.click('[data-choice="0"]');await page.waitForFunction(()=>window.__ECHO__.game.rewardKind==='route');await page.click('[data-choice="0"]');await page.waitForTimeout(600);assert.equal(await page.evaluate(()=>window.__ECHO__.screen),'playing');assert.equal(await page.evaluate(()=>window.__ECHO__.game.sector),1);
+ assert.deepEqual(errors,[]);console.log('Stress PASS: all 5 zones, all enemy sprites, boss patterns, maximum relic combinations, death/restart, settings, normal route progression. Frame samples: '+JSON.stringify(frameStats));
+}finally{await browser.close();}

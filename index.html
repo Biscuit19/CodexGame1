@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#08171c"><meta name="description" content="余响航线：在沉没记忆海中拾取光，构筑独特武器，与你的回声并肩而战。"><title>余响航线 · ECHO DRIFT</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2397efd2' d='M32 2 56 48 32 62 8 48Z'/%3E%3Cpath fill='%23091820' d='M32 16 40 43 24 43Z'/%3E%3C/svg%3E"><link rel="stylesheet" href="/src/style.css"></head>
+<body>
+<canvas id="game" aria-label="余响航线游戏画面"></canvas>
+<div id="vignette"></div>
+<header id="brand"><span class="brand-mark">◈</span><span>余响航线 <small>ECHO DRIFT</small></span><span class="edition">独立航行档案 / 01</span></header>
+<div id="hud" hidden>
+ <div class="hud-left panel"><div class="eyebrow">拾光员 <span id="level">LV.01</span></div><div class="healthline"><span id="hp">120 / 120</span><span id="rescues"></span></div><div class="bar health"><i id="hpbar"></i></div><div class="bar xp"><i id="xpbar"></i></div><div id="resources"></div></div>
+ <div class="hud-center"><div id="zone"></div><div id="objective"></div><div class="bar progress"><i id="progressbar"></i></div><div id="tide"></div></div>
+ <div class="hud-right"><button id="pause" class="small">Ⅱ <span>暂停 · ESC</span></button><div id="clock"></div><button id="build" class="small">构筑 · TAB</button></div>
+ <div id="bossbar" hidden><div id="bossname"></div><div class="bar boss"><i id="bosshp"></i></div></div>
+ <div class="hud-bottom"><div id="weaponhud" class="panel"></div><div class="skills"><div id="dashhud" class="skill panel"></div><div id="echohud" class="skill panel"></div></div><div id="interaction"></div></div>
+ <div id="eventbanner"></div><div id="toast" role="status" aria-live="polite"></div>
+ <div id="minimap-label">航段雷达 <span>● 你　◆ 信标　✦ 补给</span></div>
+</div>
+<div id="overlay"></div>
+<div id="subtitles" aria-live="polite"></div>
+<script type="module" src="/src/app.js"></script>
+</body></html>

@@ -1,0 +1,23 @@
+{
+  "name": "echo-drift",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "余响航线 — a complete single-player 2D roguelite shooter",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/core.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "check": "node --check src/core.js && node --check src/render.js && node --check src/app.js",
+    "build": "node build.mjs",
+    "test:balance": "node tests/simulate.mjs",
+    "test:offline": "node tests/offline.mjs",
+    "test:stress": "node tests/stress.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
