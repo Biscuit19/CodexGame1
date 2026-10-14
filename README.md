@@ -4,6 +4,10 @@
 
 ## 立即游玩
 
+**在线游玩：https://biscuit19.github.io/CodexGame1/**
+
+网站由 GitHub Pages 托管，无需下载或保持 Codex 云环境运行。在线版存档保存在当前浏览器的网站存储中，与下载版独立。
+
 在 GitHub 的 `codex/echo-drift-delivery` 分支中，点击 **Code → Download ZIP** 下载整个项目；或打开 `release/echo-drift.zip`，点击 **Download raw file** 下载成品包。
 
 **最方便：下载本目录的 `play.html`，用桌面版 Chrome / Edge / Firefox 打开。** 这是包含代码、画面和声音的单文件成品，无需安装依赖，也无需联网。
@@ -17,7 +21,7 @@ cd /workspace/CodexGame1
 npm start
 ```
 
-服务监听 **4173 端口**，入口为 `/`，单文件版入口为 `/play.html`。当前 Codex 云环境没有已确认可供用户访问的公网或端口转发入口；建议从 GitHub 下载成品，在本机游玩。本机运行服务后可在浏览器打开本机的 4173 端口。运行只需要 Node.js 20+，不需要先执行 `npm install`。可用 `PORT=其他端口 npm start` 更改端口。
+服务监听 **4173 端口**，入口为 `/`，单文件版入口为 `/play.html`。Codex 云环境内的开发服务没有公网入口；在线游玩请使用上方 GitHub Pages 地址。本机运行服务后可在浏览器打开本机的 4173 端口。运行只需要 Node.js 20+，不需要先执行 `npm install`。可用 `PORT=其他端口 npm start` 更改端口。
 
 ## 操作
 
