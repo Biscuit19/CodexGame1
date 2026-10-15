@@ -168,7 +168,7 @@ export class Game{
  get repairCost(){return Math.round(Math.min(9e12,40*(1+this.sector*.1+this.sector**2*.035)*Math.pow(1.12,this.repairPurchases)*Math.pow(1.12,Math.max(0,this.sector-15))));}
  get rescueCost(){return Math.round(Math.min(9e12,190*(1+this.sector*.08+this.sector**2*.025)*Math.pow(1.2,this.rescuePurchases)*Math.pow(1.15,Math.max(0,this.sector-15))));}
  get trainingCost(){return Math.round(Math.min(9e12,(120+this.sector*7)*Math.pow(1.18,this.trainingPurchases)));}
- get salvageValue(){return 20+Math.min(200,this.sector*8);}
+ get salvageValue(){return 20+Math.min(20,this.sector);}
  sanitizeShop(shop=this.shop){if(!shop)return;for(const it of shop.items){if(it.type==='relic'&&this.count(it.relic)>=(RELICS.find(r=>r.id===it.relic)?.max||0))Object.assign(it,{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,sold:false,relic:null});if(it.type==='forge'&&this.forgeLevel>=20)Object.assign(it,{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,sold:false});}shop.items=shop.items.filter(it=>it.type!=='training'||!shop.items.some(other=>other!==it&&other.type==='training'&&other.stat===it.stat&&['training','hullTraining'].includes(other.id)));}
  offerLevel(){this.pendingLevels--;this.mode='choice';this.rewardKind='level';this.choices=this.relicChoices();if(!this.choices.length){this.choices=this.trainingChoices();}else if(this.choices.length<3)this.choices.push(...this.trainingChoices().slice(0,3-this.choices.length));this.emit('choice');}
  choose(i){
