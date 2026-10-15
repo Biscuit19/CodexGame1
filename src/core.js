@@ -102,7 +102,7 @@ export const ROUTES=[
 const emptyInput=()=>({mx:0,my:0,ax:1,ay:0,shoot:false,dash:false,echo:false,interact:false});
 export class Game{
  constructor(seed=Date.now(),difficulty='normal'){
- this.rng=new RNG(seed);this.seed=seed;this.difficulty=difficulty;this.mode='playing';this.sector=0;this.time=0;this.elapsed=0;this.duration=sectorDuration(0);this.endless=false;this.campaignCleared=false;this.missedBosses=0;this.forgeLevel=0;this.shop=null;this.shopReturn='playing';this.collectionTime=0;this.stageBossKills=0;this.rewardSource='';this.beaconRewarded=false;this.eventSerial=0;this.supplyBoost=0;this.rewardRerolls=0;this.incursions=[];this.nextEvent=12;this.eventHistory=[];this.waveCount=0;this.shopVisits=0;this.kills=0;this.shots=0;this.totalDamage=0;this.id=1;this.route='quiet';this.events=[];this.pendingLevels=0;this.choices=[];this.rewardKind='';this.bossSpawned=false;this.bossKills=0;this.storySeen=false;
+ this.rng=new RNG(seed);this.seed=seed;this.difficulty=difficulty;this.mode='playing';this.sector=0;this.time=0;this.elapsed=0;this.duration=sectorDuration(0);this.endless=false;this.campaignCleared=false;this.missedBosses=0;this.forgeLevel=0;this.shop=null;this.shopReturn='playing';this.collectionTime=0;this.settlementPending=false;this.collectedChests=[];this.stageBossKills=0;this.rewardSource='';this.beaconRewarded=false;this.eventSerial=0;this.supplyBoost=0;this.rewardRerolls=0;this.incursions=[];this.nextEvent=12;this.eventHistory=[];this.waveCount=0;this.shopVisits=0;this.kills=0;this.shots=0;this.totalDamage=0;this.id=1;this.route='quiet';this.events=[];this.pendingLevels=0;this.choices=[];this.rewardKind='';this.bossSpawned=false;this.bossKills=0;this.storySeen=false;
  this.player={x:1100,y:800,r:16,hp:140,maxHp:140,xp:0,level:1,coins:0,rescues:2,angle:0,invuln:2,dashCD:0,echoCD:0,dashTime:0,dx:0,dy:0,shotCD:0,regenClock:0};
  this.weapon={frame:'needle',element:'plain',mod:'steady',rarity:'common',tier:0,name:'归航·原光织光针'};this.relics={};this.enemies=[];this.bullets=[];this.pickups=[];this.effects=[];this.hazards=[];this.echoes=[];this.history=[];this.historyClock=0;this.beacons=[];this.chests=[];this.activeEvent=null;this.eventIndex=0;this.spawnClock=2;this.satelliteClock=0;this.blackholeClock=4;this.stats={hitsTaken:0,rareFinds:0,beacons:0,echoes:0,dashes:0};this.setupSector();
  }
@@ -122,7 +122,7 @@ export class Game{
  get clearing(){return this.time>=this.duration;}
  get echoMax(){return Math.max(2.5,14*Math.pow(.97,this.supplyBoost)*Math.pow(.9,this.count('echo'))*(this.route==='echo'?.72:1)*(this.weapon.mod==='echo'?.8:1));}
  setupSector(){
- this.time=0;this.collectionTime=0;this.stageBossKills=0;this.beaconRewarded=false;this.duration=sectorDuration(this.sector);this.incursions=[];this.nextEvent=this.rng.int(10,15);this.eventIndex=0;this.activeEvent=null;this.spawnClock=.5;this.shop=this.makeShop();this.rewardRerolls=0;this.waveCount=0;this.bossSpawned=false;this.enemies=[];this.bullets=[];this.hazards=[];this.pickups=[];this.echoes=[];this.history=[];this.chests=[];this.effects=[];this.player.x=1100;this.player.y=800;this.player.invuln=3;this.player.dashTime=0;
+ this.time=0;this.collectionTime=0;this.settlementPending=false;this.collectedChests=[];this.stageBossKills=0;this.beaconRewarded=false;this.duration=sectorDuration(this.sector);this.incursions=[];this.nextEvent=this.rng.int(10,15);this.eventIndex=0;this.activeEvent=null;this.spawnClock=.5;this.shop=this.makeShop();this.rewardRerolls=0;this.waveCount=0;this.bossSpawned=false;this.enemies=[];this.bullets=[];this.hazards=[];this.pickups=[];this.echoes=[];this.history=[];this.chests=[];this.effects=[];this.player.x=1100;this.player.y=800;this.player.invuln=3;this.player.dashTime=0;
  const offset=this.rng.next()*TAU;this.beacons=Array.from({length:3},(_,i)=>({id:this.id++,x:1100+Math.cos(offset+i*TAU/3)*500,y:800+Math.sin(offset+i*TAU/3)*430,charge:0,done:false}));
  this.chests.push({id:this.id++,x:1100+this.rng.int(-240,240),y:800-260,type:'supply',cost:0});
  this.composition=this.rng.shuffle(['spitter','charger','shield','leaper','orbiter','splitter','healer','sniper','miner','reaper','lancer','bomber','summoner','spiral']).slice(0,3+Math.min(4,Math.floor(this.sector/3)));this.emit('sector',{sector:this.sector,story:this.zone.story});
@@ -140,18 +140,25 @@ export class Game{
  if(c.type==='heal')this.heal(c.amount);if(c.type==='experience')this.gainXP(c.amount);if(c.type==='rescue')this.player.rescues=Math.min(5,this.player.rescues+1);if(c.type==='forge')this.forgeLevel=Math.min(20,this.forgeLevel+1);if(c.type==='capacity'){this.player.maxHp+=c.amount;this.heal(c.amount);}if(c.type==='skill'){this.player.dashCD=0;this.player.echoCD=0;this.supplyBoost+=1;}if(c.type==='coins')this.player.coins+=c.amount;
  if(c.type==='route'){this.route=c.id;this.sector++;this.mode='playing';this.choices=[];this.rewardKind='';this.heal(18+this.count('supply')*16+(c.id==='quiet'?20:0));this.setupSector();return true;}
  if(this.rewardKind==='sector'){this.offerRoutes();return true;}
- this.mode='playing';this.choices=[];this.emit('resume');return true;
+ if(this.settlementPending){this.nextCollectedChest();return true;}this.mode='playing';this.choices=[];this.emit('resume');return true;
  }
- skipChoice(){if(this.mode!=='choice'||this.rewardKind!=='chest')return;this.player.coins+=20;this.mode='playing';this.emit('resume');}
+ skipChoice(){if(this.mode!=='choice'||this.rewardKind!=='chest')return;this.player.coins+=20;if(this.settlementPending){this.nextCollectedChest();return;}this.mode='playing';this.emit('resume');}
  offerRoutes(){this.mode='choice';this.rewardKind='route';this.choices=[{type:'route',id:this.rng.pick(ROUTES).id}];this.emit('choice');}
  finishSector(){
  if(this.mode!=='playing'||this.enemies.some(e=>e.hp>0)||this.incursions.length)return;
- if(!this.collectionTime){this.collectionTime=1.3;this.bullets=[];this.hazards=[];this.echoes=[];this.emit('collect');return;}
+ if(!this.collectionTime){this.settlementPending=true;this.collectionTime=1.3;this.bullets=[];this.hazards=[];this.echoes=[];this.emit('collect');return;}
  return;
  }
  collectPickup(item){if(item.kind==='xp')this.gainXP(item.value);if(item.kind==='coin')this.player.coins+=Math.round(item.value*(1+this.count('luck')*.25)*(this.route==='treasure'?1.5:1));if(item.kind==='heal')this.heal(item.value);}
  completeSector(){
  for(const item of this.pickups)this.collectPickup(item);this.pickups=[];this.collectionTime=0;this.enemies=[];this.activeEvent=null;
+ this.collectedChests.push(...this.chests);this.chests=[];this.nextCollectedChest();
+ }
+ nextCollectedChest(){
+ const c=this.collectedChests.shift();if(c){this.mode='choice';this.rewardKind='chest';this.rewardSource=`清场自动拾取 · ${c.type==='relic'?'黄金物资箱':'物资箱'}奖励${this.collectedChests.length?`（还剩 ${this.collectedChests.length} 箱）`:''}`;this.choices=this.chestChoices(c.type==='relic');this.emit('choice');return;}
+ this.settlementPending=false;this.completeSectorRewards();
+ }
+ completeSectorRewards(){
  if(this.sector===14&&!this.endless){this.campaignCleared=true;this.mode='won';this.emit('win');return;}
  this.player.coins+=60;this.heal(20);if(this.route==='storm')this.pendingLevels++;
  this.mode='choice';this.rewardKind='sector';this.rewardSource=this.stageBossKills?'击败首领 · 航段清场奖励':'航段清场奖励';this.choices=this.relicChoices(2,this.stageBossKills?'epic':undefined);this.choices.push({type:'weapon',weapon:rollWeapon(this.rng,this.sector+1,this.stageBossKills?'epic':undefined)});this.emit('choice');
@@ -196,7 +203,7 @@ export class Game{
  for(const side of dirs){const a=side*Math.PI/2;this.incursions.push({id:this.id++,x:clamp(p.x+Math.cos(a)*560,65,2135),y:clamp(p.y+Math.sin(a)*450,65,1535),wait:2.7,count:Math.round((9+Math.min(10,this.sector))*.7),eventSerial:this.activeEvent.serial,side,type:this.rng.pick(['drifter','skitter','leaper','reaper'])});}
  }
  if(id==='mines')for(let i=0;i<7;i++){const a=this.rng.next()*TAU;this.hazards.push({id:this.id++,type:'circle',x:clamp(p.x+Math.cos(a)*(130+i*32),50,2150),y:clamp(p.y+Math.sin(a)*(130+i*32),50,1550),r:60,wait:2+i*.22,life:.45,damage:23,fired:false});}
- if(id==='hunt')for(let i=0;i<Math.round((5+Math.floor(this.sector/3))*.7);i++)this.spawnEnemy('reaper');
+ if(id==='hunt')for(let i=0;i<8+Math.min(8,Math.floor(this.sector/2));i++)this.spawnEnemy('reaper');
  if(id==='convoy')for(let i=0;i<4;i++)this.spawnEnemy(i===0?'mimic':'shield',{specialType:i===0?'treasurer':'guardian',hp:(400+this.sector**2*55)*(i===0?2:1),maxHp:(400+this.sector**2*55)*(i===0?2:1),r:27,color:'#f0c47c'});
  if(id==='twins')for(let i=0;i<2;i++)this.spawnEnemy('reaper',{specialType:'twin',hp:700+this.sector**2*100,maxHp:700+this.sector**2*100,r:30,color:'#e99bc9',speed:195});
  if(id==='relay')for(let i=0;i<3;i++)this.spawnEnemy('spiral',{specialType:'sentinel',hp:400+this.sector**2*50,maxHp:400+this.sector**2*50,speed:45,r:26,color:'#ed8f98'});
@@ -277,7 +284,7 @@ export class Game{
  if(!noProc&&this.count('blast')&&this.rng.next()<.25*this.count('blast'))this.explode(e.x,e.y,85,24*this.damageMult);
  if(e.elite){this.player.coins+=120+this.sector*8;this.emit('toast',{text:'悬赏完成 · 获得星币与传说宝箱'});}if(e.elite)this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0});
  if(e.type==='splitter'){for(let i=0;i<3;i++)this.spawnEnemy('skitter',{x:e.x+Math.cos(i*TAU/3)*30,y:e.y+Math.sin(i*TAU/3)*30,hp:22,maxHp:22,r:11});}if(e.affix==='volatile')this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:65,wait:.8,life:.25,damage:15,fired:false});
- if(e.specialType){this.player.coins+=50+this.sector*5;if(['treasurer','rift','twin'].includes(e.specialType))this.chests.push({id:this.id++,x:e.x,y:e.y,type:this.rng.next()<.45?'relic':'supply',cost:0});}if(e.boss){(this.stats.bossFights??=[]).push({sector:this.sector,kind:e.bossKind,special:!!e.special,seconds:Math.round(e.age*10)/10});this.bossKills++;if(!e.special)this.stageBossKills++;this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'灯塔重燃 · 航线已恢复'});if(this.bossSpawned&&this.stageBossKills>=this.stageBossTarget)this.time=Math.max(this.time,this.duration);if(this.clearing&&(this.stageBossTarget===0||this.bossSpawned)&&!this.enemies.some(v=>v.hp>0)&&!this.incursions.length)this.finishSector();}
+ if(e.specialType){this.player.coins+=50+this.sector*5;if(['treasurer','rift','twin'].includes(e.specialType))this.chests.push({id:this.id++,x:e.x,y:e.y,type:this.rng.next()<.45?'relic':'supply',cost:0});}if(e.boss){(this.stats.bossFights??=[]).push({sector:this.sector,kind:e.bossKind,special:!!e.special,seconds:Math.round(e.age*10)/10});this.bossKills++;if(!e.special){this.stageBossKills++;this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0});}this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'灯塔重燃 · 航线已恢复'});if(this.bossSpawned&&this.stageBossKills>=this.stageBossTarget)this.time=Math.max(this.time,this.duration);if(this.clearing&&(this.stageBossTarget===0||this.bossSpawned)&&!this.enemies.some(v=>v.hp>0)&&!this.incursions.length)this.finishSector();}
  }
  explode(x,y,r,damage){this.emit('burst',{x,y,color:'#efc19a',r});for(const e of [...this.enemies])if(e.hp>0&&Math.hypot(e.x-x,e.y-y)<r+e.r)this.hitEnemy(e,damage,{noProc:true});}
  updateEnemy(e,dt){
@@ -347,7 +354,7 @@ export class Game{
  this.bullets=this.bullets.filter(b=>b.life>0);
  }
  update(dt,input=emptyInput()){
- if(this.mode!=='playing')return;dt=clamp(dt,0,.05);if(dt===0)return;if(this.collectionTime>0){this.collectionTime-=dt;for(const item of this.pickups){item.x+=(this.player.x-item.x)*Math.min(1,dt*8);item.y+=(this.player.y-item.y)*Math.min(1,dt*8);}if(this.collectionTime<=0)this.completeSector();return;}
+ if(this.mode!=='playing')return;dt=clamp(dt,0,.05);if(dt===0)return;if(this.collectionTime>0){this.collectionTime-=dt;for(const item of [...this.pickups,...this.chests]){item.x+=(this.player.x-item.x)*Math.min(1,dt*8);item.y+=(this.player.y-item.y)*Math.min(1,dt*8);}if(this.collectionTime<=0)this.completeSector();return;}
  const p=this.player;p.moving=Math.hypot(input.mx,input.my)>.1;p.walk=(p.walk||0)+(p.moving?dt:0);this.elapsed+=dt;this.time+=dt;p.angle=Math.atan2(input.ay||0,input.ax||.00001);p.invuln=Math.max(0,p.invuln-dt);p.dashCD=Math.max(0,p.dashCD-dt);p.echoCD=Math.max(0,p.echoCD-dt);p.shotCD-=dt;
  this.heal((.1+this.count('heart')*.22+(!this.highTide?this.count('tide')*.3:0))*dt);
  if(input.dash)this.dash(input);if(input.echo)this.summonEcho();if(input.interact){this.tryChest();if(this.mode!=='playing')return;}
@@ -381,7 +388,7 @@ export class Game{
  if(!data||![2,3,VERSION].includes(data.version)||!Number.isInteger(data.sector)||data.sector<0||data.sector>100000||!data.player||!Number.isFinite(data.player.hp)||!data.weapon||!FRAMES.some(f=>f.id===data.weapon.frame)||!RARITIES[data.weapon.rarity]||!['playing','choice','shop'].includes(data.mode))throw new Error('存档格式不兼容或已损坏');
  for(const key of ['enemies','bullets','pickups','hazards','echoes','beacons','chests','choices'])if(!Array.isArray(data[key]))throw new Error('存档缺少场景数据');
  if(!data.rng||!Number.isFinite(data.rng.state)||!Number.isFinite(data.time)||!Number.isFinite(data.elapsed)||!Number.isFinite(data.player.x)||!Number.isFinite(data.player.y)||!Number.isFinite(data.player.maxHp)||data.player.maxHp<=0||!data.relics||Object.entries(data.relics).some(([id,n])=>!RELICS.some(r=>r.id===id&&Number.isInteger(n)&&n>=0&&n<=r.max)))throw new Error('存档状态无效');
- const g=new Game(data.seed,data.difficulty);for(const k of Object.keys(g))if(k in data&&!['events','effects','history','rng'].includes(k))g[k]=data[k];g.rng=new RNG(1);g.rng.state=data.rng.state>>>0;g.events=[];g.effects=[];g.history=[];if(data.version<4){g.duration=sectorDuration(g.sector);if(g.activeEvent){g.activeEvent.targets=g.enemies.filter(e=>e.elite).map(e=>e.id);g.activeEvent.serial=++g.eventSerial;g.activeEvent.combat=g.activeEvent.targets.length>0;for(const wave of g.incursions)wave.eventSerial=g.activeEvent.serial;}if(g.rewardKind==='route'&&g.choices.length>1)g.choices=[g.rng.pick(g.choices)];if(g.shop)for(const item of g.shop.items){if(item.id==='weapon')item.cost=Math.max(item.cost,420);if(item.id==='relic')item.cost=Math.max(item.cost,280);}if(g.bossSpawned&&g.bosses.length===1&&g.stageBossTarget>1)for(let i=1;i<g.stageBossTarget;i++)g.spawnGuardian((g.boss.bossKind+i)%5,i,g.stageBossTarget);if(g.bossSpawned&&!g.bosses.length)g.stageBossKills=g.stageBossTarget;}return g;
+ const g=new Game(data.seed,data.difficulty);for(const k of Object.keys(g))if(k in data&&!['events','effects','history','rng'].includes(k))g[k]=data[k];g.rng=new RNG(1);g.rng.state=data.rng.state>>>0;g.events=[];g.effects=[];g.history=[];if(g.collectionTime>0)g.settlementPending=true;if(data.version<4){g.duration=sectorDuration(g.sector);if(g.activeEvent){g.activeEvent.targets=g.enemies.filter(e=>e.elite).map(e=>e.id);g.activeEvent.serial=++g.eventSerial;g.activeEvent.combat=g.activeEvent.targets.length>0;for(const wave of g.incursions)wave.eventSerial=g.activeEvent.serial;}if(g.rewardKind==='route'&&g.choices.length>1)g.choices=[g.rng.pick(g.choices)];if(g.shop)for(const item of g.shop.items){if(item.id==='weapon')item.cost=Math.max(item.cost,420);if(item.id==='relic')item.cost=Math.max(item.cost,280);}if(g.bossSpawned&&g.bosses.length===1&&g.stageBossTarget>1)for(let i=1;i<g.stageBossTarget;i++)g.spawnGuardian((g.boss.bossKind+i)%5,i,g.stageBossTarget);if(g.bossSpawned&&!g.bosses.length)g.stageBossKills=g.stageBossTarget;}return g;
  }
 }
 export function segmentDistance(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;if(!l)return Math.hypot(px-ax,py-ay);const t=clamp(((px-ax)*dx+(py-ay)*dy)/l,0,1);return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));}
