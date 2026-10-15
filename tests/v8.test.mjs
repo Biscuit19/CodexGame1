@@ -17,4 +17,4 @@ test('v7 endless health is rebased once when loading the slower extra pressure c
 
 test('late minion mine damage scales in the actual hazard, not only contact stats',()=>{const g=new Game(4);g.sector=19;const e=g.spawnEnemy('miner',{cd:0});g.updateEnemy(e,.05);assert.equal(g.hazards[0].damage,e.damage);assert(g.hazards[0].damage>40);});
 
-test('high-health endless bombers self-destruct exactly once instead of stacking hazards',()=>{const g=new Game(4);const e=g.spawnEnemy('bomber',{x:g.player.x+50,y:g.player.y,hp:1e12,maxHp:1e12,phase:1,wind:.01});g.updateEnemy(e,.05);assert(e.dead);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);g.updateEnemy(e,.05);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);});
+test('high-health endless bombers self-destruct exactly once instead of stacking hazards',()=>{const g=new Game(4);const e=g.spawnEnemy('bomber',{x:g.player.x+50,y:g.player.y,hp:1e12,maxHp:1e12,phase:1,wind:.01});g.updateEnemy(e,.05);assert(e.dead);assert.equal(g.totalDamage,0);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);g.updateEnemy(e,.05);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);});

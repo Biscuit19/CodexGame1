@@ -437,7 +437,7 @@ class Game{
  return true;
  }
  hitEnemy(e,damage,b={}){
- if(e.hp<=0)return;const actual=damage*((e.boss||e.elite)?1+this.count('focus')*.3+this.count('leviathan')*.18:1);this.totalDamage+=Math.min(e.hp,actual);e.hp-=actual;e.hit=.14;if(b.crit)this.heal(this.count('siphon')*.8);
+ if(e.hp<=0)return;const actual=damage*((e.boss||e.elite)?1+this.count('focus')*.3+this.count('leviathan')*.18:1);if(!b.selfDamage)this.totalDamage+=Math.min(e.hp,actual);e.hp-=actual;e.hit=.14;if(b.crit)this.heal(this.count('siphon')*.8);
  if(b.element==='frost'||(this.count('frost')&&this.rng.next()<.25*this.count('frost')))e.slow=2;
  if(b.element==='fire'||this.count('fire')){e.burn=2.4;e.burnDmg=8*this.count('fire')+(b.element==='fire'?12:0);}
  if(b.element==='void'&&!e.boss){e.x+=(this.player.x-e.x)*.02;e.y+=(this.player.y-e.y)*.02;}
@@ -472,7 +472,7 @@ class Game{
  if(e.phase===2){move=0;e.x+=Math.cos(e.chargeAngle)*470*dt;e.y+=Math.sin(e.chargeAngle)*470*dt;e.wind-=dt;if(e.wind<=0){e.phase=0;e.cd=3.6;}}
  }
  if(e.type==='bomber'&&d<105&&e.phase===0){e.phase=1;e.wind=1.2;}
- if(e.type==='bomber'&&e.phase===1){move=0;e.wind-=dt;if(e.wind<=0){this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:95,wait:0,life:.2,damage:e.damage,fired:false});this.hitEnemy(e,e.hp+1,{noProc:true});return;}}
+ if(e.type==='bomber'&&e.phase===1){move=0;e.wind-=dt;if(e.wind<=0){this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:95,wait:0,life:.2,damage:e.damage,fired:false});this.hitEnemy(e,e.hp+1,{noProc:true,selfDamage:true});return;}}
  if(e.type==='leaper'){
  if(e.phase===0&&e.cd<=0){e.phase=1;e.wind=.7;const reach=Math.min(d,this.speed*.96*.3);e.targetX=e.x+Math.cos(a)*reach;e.targetY=e.y+Math.sin(a)*reach;this.hazards.push({id:this.id++,type:'circle',x:e.targetX,y:e.targetY,r:48,wait:.85,life:.2,damage:e.damage,fired:false});}
  if(e.phase===1){move=0;e.wind-=dt;if(e.wind<=0){e.phase=2;e.wind=.3;e.vx=(e.targetX-e.x)/.3;e.vy=(e.targetY-e.y)/.3;}}
