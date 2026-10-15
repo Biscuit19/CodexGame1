@@ -539,3 +539,20 @@ export class Game{
  }
 }
 export function segmentDistance(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;if(!l)return Math.hypot(px-ax,py-ay);const t=clamp(((px-ax)*dx+(py-ay)*dy)/l,0,1);return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));}
+
+// A balanced sample of normal progression, not a maximum-power build.
+export function createPracticeGame(stage,seed=Date.now(),difficulty='normal'){
+ if(!Number.isInteger(stage)||stage<1||stage>100)throw new RangeError('关卡范围为 1–100');
+ const g=new Game(seed,difficulty),stats=['damage','rate','health','move','crit','regen','cooldown'];
+ let attribute=0;
+ const grow=()=>{let stat=stats[attribute++%stats.length];if(stat==='cooldown'&&g.basicLevels.cooldown>=15)stat='damage';g.applyBasic(stat);};
+ for(let s=0;s<stage-1;s++){
+  g.sector=s;
+  // Two attribute rewards, two relic/skill rewards and one shop upgrade per stage.
+  grow();grow();
+  for(let j=0;j<2;j++){const skills=g.skillChoices();if(j===1&&s%3===2&&skills.length)g.addSkillUpgrade(g.rng.pick(skills).id);else{const c=g.relicChoices(1)[0];if(c)g.addRelic(c.id);else grow();}}
+  grow();
+  if(s%3===2||s===stage-2){const candidates=Array.from({length:5},()=>rollWeapon(g.rng,s));candidates.sort((a,b)=>g.weaponDPS(a)-g.weaponDPS(b));g.weapon=candidates[2];}
+ }
+ g.practice=true;g.sector=stage-1;g.endless=stage>20;g.campaignCleared=g.endless;g.player.level=1+Math.floor((stage-1)*1.35);g.player.xp=0;g.player.coins=stage===1?0:100+(stage-1)*35;g.player.hp=g.player.maxHp;g.player.dashCD=0;g.player.echoCD=0;g.setupSector();g.drain();return g;
+}
