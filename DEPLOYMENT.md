@@ -3,10 +3,10 @@
 - 网站：https://biscuit19.github.io/CodexGame1/
 - 版本：**深海远征 / 08（v8）**，旧页面请 Ctrl+F5 刷新。
 - 托管：GitHub Pages，发布源为 `gh-pages` 分支根目录。
-- 游戏源码提交：`abca44a4e2f024d6d6a59bc373837e82c56324d8`，分支 `codex/echo-drift-delivery`。
-- 发布提交：`a9448429b9f713601d53e34c47a837195c7b1716`。
+- 游戏源码提交：`c8214faebe323e2cc4f581c258c8d0366867dafa`，分支 `codex/echo-drift-delivery`。
+- 发布提交：`4811acd9b5d763af6053b170bd5d93e8d569efcf`。
 - GitHub Actions `pages-build-deployment` 状态：**Success**，已于 2026-10-15 确认该提交。
-- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38743201235
+- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38743666130
 
 Pages 的 index.html 与通过测试的 web.html 逐字节一致，完整 assets Git 树与源码一致；包含 43 首音乐、68 张透明图标、署名和许可。在线入口约 183 KiB，音频按需加载。
 
