@@ -178,6 +178,9 @@ export class Game{
  get bosses(){return this.enemies.filter(e=>e.boss&&e.hp>0);}
  get boss(){return this.bosses[0];}
  get stageBossTarget(){return bossCountForSector(this.sector,this.endless);}
+ get coinText(){return this.practice?'∞':String(this.player.coins);}
+ canAfford(cost){return !!this.practice||this.player.coins>=cost;}
+ spendCoins(cost){if(!this.canAfford(cost))return false;if(!this.practice)this.player.coins-=cost;return true;}
  weaponDPS(w=this.weapon){const i=weaponInfo(w);return i.damage*i.count*i.rate*this.damageMult*this.rateMult;}
  get xpNeed(){return Math.floor(38+this.player.level*22+this.player.level**1.8*7);}
  count(id){return this.relics[id]||0;}
@@ -277,8 +280,8 @@ export class Game{
  chestChoices(gold=false){const relics=this.relicChoices(2,gold?'epic':undefined);const pool=[...relics,...this.basicChoices(2),...(this.skillChoices().length?[this.rng.pick(this.skillChoices())]:[]),...(!relics.length?this.trainingChoices().slice(0,2):[]),{type:'weapon',weapon:rollWeapon(this.rng,this.sector,gold?'legendary':this.rng.next()<.3?'epic':undefined)},{type:'experience',amount:100+this.sector*25},{type:'capacity',amount:this.endless?2:20},...(this.forgeLevel<20?[{type:'forge'}]:[]),{type:'skill'},{type:'coins',amount:45+this.rng.int(0,80)}];if(this.player.hp<this.player.maxHp*.75)pool.push({type:'heal',amount:85});if(this.player.rescues<5)pool.push({type:'rescue'});const selected=this.rng.shuffle(pool).slice(0,3);selected[gold?1:0]=this.basicChoices(1)[0];if(!gold&&this.sector<6&&relics.length&&this.rng.next()<.6)selected[1]=this.rng.pick(relics);if(this.sector>=6&&!gold)selected[1]={type:'weapon',weapon:rollWeapon(this.rng,this.sector)};if(gold)selected[0]={type:'weapon',weapon:rollWeapon(this.rng,this.sector,'legendary')};for(const c of selected)if(c.type==='coins')c.amount=Math.max(c.amount,this.recycleValue(selected)+25);return selected;}
  tryChest(){
  const c=this.chests.find(c=>dist(c,this.player)<90);if(!c){if(dist(this.player,{x:1100,y:800})<120)this.openShop();return;}
- if(this.player.coins<c.cost){this.emit('toast',{text:`需要 ${c.cost} 枚星币`});return;}
- this.player.coins-=c.cost;this.chests=this.chests.filter(x=>x!==c);this.mode='choice';this.rewardKind='chest';
+ if(!this.canAfford(c.cost)){this.emit('toast',{text:`需要 ${c.cost} 枚星币`});return;}
+ this.spendCoins(c.cost);this.chests=this.chests.filter(x=>x!==c);this.mode='choice';this.rewardKind='chest';
  this.rewardSource=c.type==='relic'?'黄金物资箱奖励':'物资箱奖励';this.choices=this.chestChoices(c.type==='relic');this.emit('choice');
  }
  spawnEnemy(type,opts={}){
@@ -333,10 +336,10 @@ export class Game{
  {id:'weapon',name:'珍稀武器',cost:sale?300:420,type:'weapon',weapon:rollWeapon(this.rng,this.sector,this.sector>=6?undefined:this.rng.next()<.12?'legendary':'epic')},{id:'training',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,type:'training',stat:'power'},{id:'hullTraining',name:'船体研修',desc:'生命上限 +2',cost:this.trainingCost,type:'training',stat:'hull'}]};if(!relic)Object.assign(shop.items.find(it=>it.id==='relic'),{name:'火力研修',cost:this.trainingCost});if(this.forgeLevel>=20)Object.assign(shop.items.find(it=>it.id==='forge'),{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost});const skill=this.rng.pick(this.skillChoices());if(skill){const u=SKILL_UPGRADES.find(u=>u.id===skill.id);shop.items.push({id:'skillUpgrade',type:'skillUpgrade',upgrade:u.id,name:u.name,desc:u.desc,cost:Math.round(150+this.sector*12)});}this.sanitizeShop(shop);if(this.sector<6)shop.items=shop.items.filter(it=>!['training','hullTraining'].includes(it.id));return shop;}
  openShop(){if(this.collectionTime>0)return false;if(!['playing','choice'].includes(this.mode))return false;if(this.mode==='playing'&&dist(this.player,{x:1100,y:800})>120)return false;if(this.mode==='choice'&&this.rewardKind!=='route')return false;this.sanitizeShop();this.shopReturn=this.mode;this.mode='shop';this.shopVisits++;this.emit('shop');return true;}
  closeShop(){if(this.mode!=='shop')return;this.mode=this.shopReturn;if(this.mode==='choice')this.emit('choice');else this.emit('resume');}
- buy(id){if(this.mode!=='shop')return false;const it=this.shop.items.find(i=>i.id===id);if(!it||it.sold||this.player.coins<it.cost)return false;
+ buy(id){if(this.mode!=='shop')return false;const it=this.shop.items.find(i=>i.id===id);if(!it||it.sold||!this.canAfford(it.cost))return false;
  if(it.type==='heal'&&this.player.hp>=this.player.maxHp)return false;if(it.type==='skillUpgrade'&&!this.skillChoices().some(c=>c.id===it.upgrade))return false;if(it.type==='forge'&&this.forgeLevel>=20)return false;if(it.type==='rescue'&&this.player.rescues>=5)return false;
  if(it.type==='basicStat'&&!this.applyBasic(it.stat))return false;if(it.type==='relic'&&!this.addRelic(it.relic))return false;
- if(it.type==='skillUpgrade'&&!this.addSkillUpgrade(it.upgrade))return false;this.player.coins-=it.cost;
+ if(it.type==='skillUpgrade'&&!this.addSkillUpgrade(it.upgrade))return false;this.spendCoins(it.cost);
  if(it.type==='heal'){this.heal(it.amount);this.repairPurchases++;it.cost=this.repairCost;}
  if(it.type==='forge'){this.forgeLevel++;it.cost=Math.round(75*1.35**this.forgeLevel);}
  if(it.type==='rescue'){this.player.rescues++;this.shop.rescueBuys++;this.rescuePurchases++;it.cost=this.rescueCost;}
@@ -345,8 +348,8 @@ export class Game{
  if(it.type==='weapon'){this.weapon=it.weapon;this.stats.rareFinds++;}
  if(['weapon','relic','skillUpgrade'].includes(it.type))it.sold=true;
  this.sanitizeShop();this.emit('sound',{name:'purchase'});return true;}
- rerollShop(){if(this.mode!=='shop')return false;const cost=30+this.shop.rerolls*15;if(this.player.coins<cost)return false;this.player.coins-=cost;const rerolls=this.shop.rerolls+1,old=this.shop;this.shop=this.makeShop(old.sale);this.shop.rerolls=rerolls;this.shop.rescueBuys=old.rescueBuys;for(const id of ['repair','rescue'])this.shop.items.find(i=>i.id===id).cost=old.items.find(i=>i.id===id).cost;return true;}
- rerollReward(){if(this.mode!=='choice'||this.rewardKind!=='level')return false;const cost=25+this.rewardRerolls*15;if(this.player.coins<cost)return false;this.player.coins-=cost;this.rewardRerolls++;this.choices=this.upgradeChoices();this.emit('choice');return true;}
+ rerollShop(){if(this.mode!=='shop')return false;const cost=30+this.shop.rerolls*15;if(!this.spendCoins(cost))return false;const rerolls=this.shop.rerolls+1,old=this.shop;this.shop=this.makeShop(old.sale);this.shop.rerolls=rerolls;this.shop.rescueBuys=old.rescueBuys;for(const id of ['repair','rescue'])this.shop.items.find(i=>i.id===id).cost=old.items.find(i=>i.id===id).cost;return true;}
+ rerollReward(){if(this.mode!=='choice'||this.rewardKind!=='level')return false;const cost=25+this.rewardRerolls*15;if(!this.spendCoins(cost))return false;this.rewardRerolls++;this.choices=this.upgradeChoices();this.emit('choice');return true;}
  startEndless(){if(this.mode!=='won'||!this.campaignCleared)return false;this.endless=true;this.resultRecorded=false;this.sector=20;this.mode='playing';this.player.rescues=Math.max(1,this.player.rescues);this.heal(this.player.maxHp);this.setupSector();return true;}
  updateDirector(dt){
  for(const wave of this.incursions){wave.wait-=dt;if(wave.wait<=0&&!wave.spawned){wave.spawned=true;this.waveCount++;for(let i=0;i<wave.count;i++){let x=clamp(wave.x+this.rng.int(-85,85),30,2170),y=clamp(wave.y+this.rng.int(-85,85),30,1570);if(Math.hypot(x-this.player.x,y-this.player.y)<160){const a=Math.atan2(y-this.player.y,x-this.player.x);x=clamp(this.player.x+Math.cos(a)*210,30,2170);y=clamp(this.player.y+Math.sin(a)*210,30,1570);}const e=this.spawnEnemy(wave.type,{x,y});if(e&&this.activeEvent?.serial===wave.eventSerial)this.activeEvent.targets.push(e.id);}}}
