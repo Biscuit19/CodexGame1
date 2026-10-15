@@ -1,6 +1,6 @@
 // Original mechanical maritime cutouts. Each silhouette describes the actual item.
 import {mkdir,writeFile} from 'node:fs/promises';
-import {RELICS,FRAMES} from '../src/core.js';
+import {LEGACY_RELICS,FRAMES} from '../src/core.js';
 await mkdir('assets/icons',{recursive:true});
 const ink='#0a2634',steel='url(#steel)',mint='url(#mint)',gold='url(#gold)',blue='url(#blue)',red='#f18c83';
 const P=(d,f=steel,s=ink,w=4)=>`<path d="${d}" fill="${f}" stroke="${s}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -87,8 +87,8 @@ const weapon={
 };
 const defs=`<defs><linearGradient id="steel" x2=".6" y2="1"><stop stop-color="#edf6e9"/><stop offset=".48" stop-color="#a4bfc1"/><stop offset="1" stop-color="#49677a"/></linearGradient><linearGradient id="mint" x2=".8" y2="1"><stop stop-color="#d2ffee"/><stop offset=".45" stop-color="#73ccb8"/><stop offset="1" stop-color="#347d83"/></linearGradient><linearGradient id="gold" x2=".7" y2="1"><stop stop-color="#fff1b4"/><stop offset=".55" stop-color="#d5ad68"/><stop offset="1" stop-color="#947344"/></linearGradient><linearGradient id="blue" x2=".8" y2="1"><stop stop-color="#c9f5ff"/><stop offset=".45" stop-color="#73b5da"/><stop offset="1" stop-color="#425e9a"/></linearGradient></defs>`;
 async function save(id,body,label){await writeFile('assets/icons/'+id+'.svg',`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img"><title>${label}</title>${defs}<g stroke-linejoin="round">${body}</g></svg>`);}
-for(const r of RELICS)await save(r.id,shapes[r.id](),r.name);
+for(const r of LEGACY_RELICS)await save(r.id,shapes[r.id](),r.name);
 for(const id of ['abilityDash','abilityEcho','beacon','coins','heal','experience','capacity','forge','skill','rescue','training','power','hull'])await save(id,shapes[id](),({abilityDash:'机器人折光冲刺',abilityEcho:'机器人回声分身',beacon:'航标灯塔'})[id]||id);
 for(const f of FRAMES)await save('weapon-'+f.id,weapon[f.id](),f.name+'：'+f.desc);
 await save('weapon',weapon.needle(),'武器');
-console.log('Generated 68 semantic mechanical maritime icons.');
+console.log('Generated 68 semantic inventory icons; ice-block.svg is a separate original effect asset.');

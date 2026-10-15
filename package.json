@@ -1,12 +1,12 @@
 {
   "name": "echo-drift",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
   "description": "\u4f59\u54cd\u822a\u7ebf \u2014 a complete single-player 2D roguelite shooter",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test tests/core.test.mjs tests/saves.test.mjs tests/progression.test.mjs tests/v7.test.mjs tests/v8.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/saves.test.mjs tests/progression.test.mjs tests/v7.test.mjs tests/v8.test.mjs tests/v9.test.mjs",
     "test:browser": "node tests/browser.mjs",
     "check": "node --check src/saves.js && node --check src/core.js && node --check src/render.js && node --check src/app.js && node --check src/assets.js && node --check src/music.js && node --check build.mjs && node --check server.mjs",
     "build": "node build.mjs",
@@ -17,6 +17,7 @@
     "test:v3": "node tests/v3-browser.mjs",
     "test:v4": "node tests/v4-browser.mjs",
     "test:v41": "node tests/v41-browser.mjs",
+    "test:v9": "node tests/v9-browser.mjs",
     "test:v8": "node tests/v8-browser.mjs",
     "test:v7": "node tests/v7-browser.mjs",
     "test:v6": "node tests/v6-browser.mjs",

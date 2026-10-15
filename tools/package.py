@@ -18,5 +18,6 @@ with ZipFile(archive) as z:
     assert z.testzip() is None
     assert z.read('play.html') == (root / 'web.html').read_bytes()
     assert len([n for n in z.namelist() if n.endswith('.mp3')]) == 43
+    assert len([n for n in z.namelist() if n.endswith('.svg')]) == 69
 shutil.copyfile(archive, out / '余响航线-完整游戏.zip')
 print(f'Validated {len(files)} files; each archive {archive.stat().st_size / 1024**2:.2f} MiB')
