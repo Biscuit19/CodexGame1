@@ -16,3 +16,5 @@ test('v7 saves default new skill paths without losing inventory and reject inval
 test('v7 endless health is rebased once when loading the slower extra pressure curve',()=>{const g=new Game(3);g.endless=true;g.sector=27;g.enemies=[];g.spawnEnemy('shield');const d=g.snapshot();d.version=7;const factor=1.55**3;d.enemies[0].hp*=factor;d.enemies[0].maxHp*=factor;const r=Game.restore(d);assert(Math.abs(r.enemies[0].hp-g.enemies[0].hp)<.001);assert.equal(Game.restore(r.snapshot()).enemies[0].hp,r.enemies[0].hp);});
 
 test('late minion mine damage scales in the actual hazard, not only contact stats',()=>{const g=new Game(4);g.sector=19;const e=g.spawnEnemy('miner',{cd:0});g.updateEnemy(e,.05);assert.equal(g.hazards[0].damage,e.damage);assert(g.hazards[0].damage>40);});
+
+test('high-health endless bombers self-destruct exactly once instead of stacking hazards',()=>{const g=new Game(4);const e=g.spawnEnemy('bomber',{x:g.player.x+50,y:g.player.y,hp:1e12,maxHp:1e12,phase:1,wind:.01});g.updateEnemy(e,.05);assert(e.dead);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);g.updateEnemy(e,.05);assert.equal(g.hazards.filter(h=>h.type==='circle').length,1);});
