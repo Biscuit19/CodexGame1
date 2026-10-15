@@ -1,0 +1,10 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+const b=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+try{const p=await b.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.stack));await p.goto('http://127.0.0.1:4173/?test=1');await p.click('[data-action="new"]');await p.locator('[data-create]').first().click();await p.click('[data-action="start"]');await p.click('[data-action="begin"]');
+await p.evaluate(()=>{const a=window.__ECHO__,g=a.game;g.player.level=50;g.player.invuln=999;a.settings.autoFire=false;g.player.coins=99999;g.shop=g.makeShop();});
+await p.keyboard.press('KeyB');
+// Click the real shop button, measure the dedicated purse sound through Web Audio.
+await p.evaluate(()=>{const a=window.__ECHO__,ctx=a.audio.ctx;a.settings.sfxVolume=1;a.audio.update(.1);const an=ctx.createAnalyser();an.fftSize=2048;a.audio.master.connect(an);window.purseAnalyser=an;});await p.click('[data-buy="forge"]');const peak=await p.evaluate(async()=>{const an=window.purseAnalyser,data=new Float32Array(2048);let max=0;for(let i=0;i<25;i++){await new Promise(r=>setTimeout(r,8));an.getFloatTimeDomainData(data);for(const n of data)max=Math.max(max,Math.abs(n));}window.__ECHO__.audio.master.disconnect(an);return max;});assert(peak>.01);await p.click('[data-action="closeShop"]');
+await p.evaluate(()=>{const a=window.__ECHO__,g=a.game;g.endless=true;g.sector=27;g.setupSector();g.spawnBoss();g.player.invuln=999;g.player.vx=235;g.player.vy=0;g.bossAmbush(g.boss);g.nextEvent=999;g.spawnClock=999;});await p.waitForTimeout(400);await p.screenshot({path:'test-results/v10-boss-ambush.png'});await p.keyboard.press('Escape');await p.reload();await p.click('[data-action="continue"]');assert.equal(await p.evaluate(()=>window.__ECHO__.game.sector),27);assert.equal(await p.evaluate(()=>window.__ECHO__.game.bosses.length),3);assert.deepEqual(errors,[]);console.log('V10 browser PASS: actual shop click / purse waveform, stage 28 multi-boss prediction render, pause and save/reload.',{pursePeak:peak});
+}finally{await b.close();}
