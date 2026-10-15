@@ -1,10 +1,12 @@
-export const VERSION=5;
+export const VERSION=6;
 export const BEACON_SECONDS=3.5;
 export const RANGED_TYPES=new Set(["spitter","sniper","spiral","orbiter","healer","miner","lancer","mimic","summoner"]);
 export const SECTOR_TIMES=[25,30,40,35,40,45,45,50,55,50,55,60,60,60,90];
 export const endlessBossCount=n=>Math.min(5,1+Math.floor(Math.max(0,n-15)/3));
 export const sectorDuration=n=>n>=15?60+(endlessBossCount(n)-1)*7.5:SECTOR_TIMES[n];
 export const EVENT_NAMES={rain:'星雨漂流 · 星屑与修复落入海域',surge:'狂潮共振 · 敌群与射速同时增强',gravity:'失重海流 · 移动加速，敌弹减速',caravan:'漂流商队 · 靠近商店采购新货',elite:'悬赏猎场 · 35 秒内击败黄金精英',rescue:'无人信号 · 充能临时信标获得修复',invasion:'单侧突袭 · 预警方向将涌入大群敌人',pincer:'双翼夹击 · 两侧敌群即将合围',mines:'水雷漂流 · 躲开闪烁的爆破区域',hunt:'追猎时刻 · 高速追猎者进入战场',convoy:'装甲护送 · 击败运宝卫队',twins:'共生双子 · 击败两名共生精英',relay:'干扰阵列 · 清除脉冲哨兵',rift:'裂隙守卫 · 击败守卫赢取金箱',jackpot:'沉船金库 · 黄金物资漂入海域',overdrive:'超载供能 · 射速临时提升',meteor:'陨星风暴 · 连锁红色落点预警'};
+export const endlessPressure=n=>Math.min(1e9,Math.pow(1.55,Math.max(0,n-15)));
+export const endlessDamage=n=>Math.min(1e5,Math.pow(1.13,Math.max(0,n-15)));
 export const WORLD={w:2200,h:1600};
 export const TAU=Math.PI*2;
 export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -56,7 +58,7 @@ export function rollWeapon(rng,sector=0,forced){
  if(sector<9&&['ancient','mythic'].includes(rarity))rarity='legendary';if(sector<12&&rarity==='mythic')rarity='ancient';
  const pool=FRAMES.filter(f=>(f.minSector||0)<=sector),newest=pool.filter(f=>(f.minSector||0)>=Math.max(4,sector>=12?9:sector>=9?6:4));
  const frame=rng.pick(newest.length&&rng.next()<.6?newest:pool),element=rng.pick(ELEMENTS),mod=rng.pick(MODS);
- return{frame:frame.id,element:element.id,mod:mod.id,rarity,tier:Math.floor(sector/3),name:`${mod.name}·${element.name}${frame.name}`};
+ return{frame:frame.id,element:element.id,mod:mod.id,rarity,tier:Math.min(6,Math.floor(sector/3)),name:`${mod.name}·${element.name}${frame.name}`};
 }
 export function weaponInfo(w){const f=FRAMES.find(x=>x.id===w.frame)||FRAMES[0];const el=ELEMENTS.find(x=>x.id===w.element)||ELEMENTS[0];const mod=MODS.find(x=>x.id===w.mod)||MODS[0];return{...f,el,modifier:mod,rarityInfo:RARITIES[w.rarity],damage:f.damage*RARITIES[w.rarity].mult*(1+w.tier*.14)*(w.mod==='giant'?1.2:1)*(w.mod==='split'?.78:1),count:f.count+(w.mod==='split'?1:0),radius:f.radius*(w.mod==='giant'?1.45:1)};}
 export const RELICS=[
@@ -83,12 +85,22 @@ export const RELICS=[
  {id:'capacitor',name:'海盐电容',icon:'ϟ',desc:'冲刺结束时清除附近敌弹并伤害敌人',max:2,rarity:'epic'},
  {id:'crown',name:'无王之冠',icon:'♔',desc:'所有伤害 +40%，生命上限 +30',max:1,rarity:'legendary'},
  {id:'binary',name:'另一种人生',icon:'∞',desc:'同时召唤两个回声，分身伤害提高',max:1,rarity:'legendary'},
- {id:'phoenix',name:'最后一根灯芯',icon:'♜',desc:'增加一次满血救援机会',max:2,rarity:'legendary'},
+ {id:'phoenix',name:'最后一根灯芯',icon:'♜',desc:'救援 +1 次',max:2,rarity:'legendary'},
  {id:'blackhole',name:'瓶装黑夜',icon:'●',desc:'每 8 秒在最近敌人处生成引力漩涡',max:1,rarity:'legendary'},
  {id:'triad',name:'三相余响',icon:'△',desc:'每第三轮射击额外释放一圈星弹',max:1,rarity:'legendary'},
  {id:'supply',name:'远洋便当',icon:'▤',desc:'每个航段额外修复 16 生命，击败敌人更易掉落补给',max:3,rarity:'common'},
  {id:'focus',name:'守灯人的眼睛',icon:'◎',desc:'对首领和精英伤害 +30%',max:3,rarity:'rare'}
 ];
+RELICS.push(
+ {id:'leviathan',name:'猎鲸契印',icon:'',desc:'对首领和悬赏伤害 +18%',max:3,rarity:'ancient',minSector:9,highOnly:true},
+ {id:'reactor',name:'熔星反应炉',icon:'',desc:'伤害 +10%',max:3,rarity:'ancient',minSector:9,highOnly:true},
+ {id:'ballast',name:'深潜核心',icon:'',desc:'生命上限 +40',max:3,rarity:'ancient',minSector:9,highOnly:true},
+ {id:'siphon',name:'赤潮圣杯',icon:'',desc:'暴击命中恢复 0.8 生命',max:3,rarity:'ancient',minSector:9,highOnly:true},
+ {id:'harpoon',name:'逐星矛尖',icon:'',desc:'弹速 +8%',max:3,rarity:'ancient',minSector:9,highOnly:true},
+ {id:'afterimage',name:'镜海圣典',icon:'',desc:'分身伤害 +12%',max:2,rarity:'mythic',minSector:12,highOnly:true},
+ {id:'sundial',name:'停潮沙漏',icon:'',desc:'冲刺无敌时间 +0.08 秒',max:2,rarity:'mythic',minSector:12,highOnly:true},
+ {id:'phoenixcore',name:'不熄灯塔',icon:'',desc:'击败首领恢复一次救援',max:1,rarity:'mythic',minSector:12,highOnly:true}
+);
 export const ENEMIES={
  drifter:{name:'漂流者',hp:38,speed:145,r:17,damage:10,xp:5,color:'#adc6b8'},
  skitter:{name:'剪影蟹',hp:25,speed:220,r:15,damage:8,xp:5,color:'#ecc69a'},
@@ -117,7 +129,7 @@ export const ROUTES=[
 const emptyInput=()=>({mx:0,my:0,ax:1,ay:0,shoot:false,dash:false,echo:false,interact:false});
 export class Game{
  constructor(seed=Date.now(),difficulty='normal'){
- this.rng=new RNG(seed);this.seed=seed;this.difficulty=difficulty;this.mode='playing';this.sector=0;this.time=0;this.elapsed=0;this.duration=sectorDuration(0);this.endless=false;this.campaignCleared=false;this.resultRecorded=false;this.missedBosses=0;this.forgeLevel=0;this.shop=null;this.shopReturn='playing';this.collectionTime=0;this.settlementPending=false;this.collectedChests=[];this.stageBossKills=0;this.rewardSource='';this.beaconRewarded=false;this.eventSerial=0;this.supplyBoost=0;this.rewardRerolls=0;this.incursions=[];this.nextEvent=12;this.eventHistory=[];this.waveCount=0;this.shopVisits=0;this.kills=0;this.shots=0;this.totalDamage=0;this.id=1;this.route='quiet';this.events=[];this.pendingLevels=0;this.choices=[];this.rewardKind='';this.bossSpawned=false;this.bossKills=0;this.storySeen=false;
+ this.rng=new RNG(seed);this.seed=seed;this.difficulty=difficulty;this.mode='playing';this.sector=0;this.time=0;this.elapsed=0;this.duration=sectorDuration(0);this.endless=false;this.campaignCleared=false;this.resultRecorded=false;this.missedBosses=0;this.forgeLevel=0;this.shop=null;this.shopReturn='playing';this.collectionTime=0;this.settlementPending=false;this.sectorRewarded=false;this.sectorClaimed=false;this.pendingRoutes=[];this.training={power:0,hull:0};this.trainingPurchases=0;this.repairPurchases=0;this.rescuePurchases=0;this.collectedChests=[];this.stageBossKills=0;this.rewardSource='';this.beaconRewarded=false;this.eventSerial=0;this.supplyBoost=0;this.rewardRerolls=0;this.incursions=[];this.nextEvent=12;this.eventHistory=[];this.waveCount=0;this.shopVisits=0;this.kills=0;this.shots=0;this.totalDamage=0;this.id=1;this.route='quiet';this.events=[];this.pendingLevels=0;this.choices=[];this.rewardKind='';this.bossSpawned=false;this.bossKills=0;this.storySeen=false;
  this.player={x:1100,y:800,r:16,hp:140,maxHp:140,xp:0,level:1,coins:0,rescues:2,angle:0,invuln:2,dashCD:0,echoCD:0,dashTime:0,dx:0,dy:0,shotCD:0,regenClock:0};
  this.weapon={frame:'needle',element:'plain',mod:'steady',rarity:'common',tier:0,name:'归航·原光织光针'};this.relics={};this.enemies=[];this.bullets=[];this.pickups=[];this.effects=[];this.hazards=[];this.echoes=[];this.history=[];this.historyClock=0;this.beacons=[];this.chests=[];this.activeEvent=null;this.eventIndex=0;this.spawnClock=2;this.satelliteClock=0;this.blackholeClock=4;this.stats={hitsTaken:0,rareFinds:0,beacons:0,echoes:0,dashes:0};this.setupSector();
  }
@@ -131,34 +143,44 @@ export class Game{
  weaponDPS(w=this.weapon){const i=weaponInfo(w);return i.damage*i.count*i.rate*this.damageMult*(1+this.count("spring")*.12);}
  get xpNeed(){return Math.floor(38+this.player.level*22+this.player.level**1.8*7);}
  count(id){return this.relics[id]||0;}
- get damageMult(){return(1+this.count('lens')*.16+this.count('crown')*.4+this.forgeLevel*.12)*(this.highTide?1+this.count('tide')*.35:1);}
+ get damageMult(){return(1+this.count('lens')*.16+this.count('crown')*.4+this.forgeLevel*.12+this.training.power*.008+this.count('reactor')*.1)*(this.highTide?1+this.count('tide')*.35:1);}
  get speed(){return 235*(1+this.count('boots')*.1)*(this.activeEvent?.id==='gravity'?1.15:1);}
  get dashMax(){return Math.max(.65,3.5*Math.pow(.97,this.supplyBoost)*Math.pow(.82,this.count('dash')));}
  get clearing(){return this.time>=this.duration;}
  get echoMax(){return Math.max(2.5,14*Math.pow(.97,this.supplyBoost)*Math.pow(.9,this.count('echo'))*(this.route==='echo'?.72:1)*(this.weapon.mod==='echo'?.8:1));}
  setupSector(){
- this.time=0;this.collectionTime=0;this.settlementPending=false;this.collectedChests=[];this.stageBossKills=0;this.beaconRewarded=false;this.duration=sectorDuration(this.sector);this.incursions=[];this.nextEvent=this.rng.int(10,15);this.eventIndex=0;this.activeEvent=null;this.spawnClock=.5;this.shop=this.makeShop();this.rewardRerolls=0;this.waveCount=0;this.bossSpawned=false;this.enemies=[];this.bullets=[];this.hazards=[];this.pickups=[];this.echoes=[];this.history=[];this.chests=[];this.effects=[];this.player.x=1100;this.player.y=800;this.player.invuln=3;this.player.dashTime=0;
+ this.time=0;this.collectionTime=0;this.settlementPending=false;this.sectorRewarded=false;this.sectorClaimed=false;this.pendingRoutes=[];this.collectedChests=[];this.stageBossKills=0;this.beaconRewarded=false;this.duration=sectorDuration(this.sector);this.incursions=[];this.nextEvent=this.rng.int(10,15);this.eventIndex=0;this.activeEvent=null;this.spawnClock=.5;this.shop=this.makeShop();this.rewardRerolls=0;this.waveCount=0;this.bossSpawned=false;this.enemies=[];this.bullets=[];this.hazards=[];this.pickups=[];this.echoes=[];this.history=[];this.chests=[];this.effects=[];this.player.x=1100;this.player.y=800;this.player.invuln=3;this.player.dashTime=0;
  const offset=this.rng.next()*TAU;this.beacons=Array.from({length:3},(_,i)=>({id:this.id++,x:1100+Math.cos(offset+i*TAU/3)*500,y:800+Math.sin(offset+i*TAU/3)*430,charge:0,done:false}));
  this.chests.push({id:this.id++,x:1100+this.rng.int(-240,240),y:800-260,type:'supply',cost:0});
  this.composition=this.rng.shuffle(['spitter','charger','shield','leaper','orbiter','splitter','healer','sniper','miner','reaper','lancer','bomber','summoner','spiral']).slice(0,3+Math.min(4,Math.floor(this.sector/3)));this.emit('sector',{sector:this.sector,story:this.zone.story});
  }
- addRelic(id){const r=RELICS.find(r=>r.id===id);if(!r||this.count(id)>=r.max)return false;this.relics[id]=this.count(id)+1;if(id==='shell'){this.player.maxHp+=25;this.heal(25);}if(id==='crown'){this.player.maxHp+=30;this.heal(30);}if(id==='phoenix')this.player.rescues=Math.min(5,this.player.rescues+1);return true;}
+ addRelic(id){const r=RELICS.find(r=>r.id===id);if(!r||this.count(id)>=r.max)return false;this.relics[id]=this.count(id)+1;if(id==='shell'){this.player.maxHp+=25;this.heal(25);}if(id==='crown'){this.player.maxHp+=30;this.heal(30);}if(id==='ballast'){this.player.maxHp+=40;this.heal(40);}if(id==='phoenix')this.player.rescues=Math.min(5,this.player.rescues+1);return true;}
  heal(n){this.player.hp=Math.min(this.player.maxHp,this.player.hp+n);}
- gainXP(n){this.player.xp+=n*(1+this.count('magnet')*.1)*(this.route==='storm'?1.3:1);while(this.player.xp>=this.xpNeed){this.player.xp-=this.xpNeed;this.player.level++;this.pendingLevels++;this.heal(5);}}
+ gainXP(n){this.player.xp+=n/(this.endless?1+Math.max(0,this.sector-15)*.3:1)*(1+this.count('magnet')*.1)*(this.route==='storm'?1.3:1);while(this.player.xp>=this.xpNeed){this.player.xp-=this.xpNeed;this.player.level++;this.pendingLevels++;this.heal(5);}}
  relicChoices(n=3,minimum){
- const pool=RELICS.filter(r=>this.count(r.id)<r.max&&(r.id!=='phoenix'||this.player.rescues<5));let weighted=[];for(const r of pool){let w={common:8,rare:5,epic:2,legendary:.6}[r.rarity];if(minimum==='epic')w={common:0,rare:1,epic:5,legendary:2}[r.rarity];weighted.push({r,key:-Math.log(Math.max(.00001,this.rng.next()))/Math.max(.00001,w)});}return weighted.sort((a,b)=>a.key-b.key).slice(0,n).map(x=>({type:'relic',id:x.r.id}));
+ const eligible=RELICS.filter(r=>this.count(r.id)<r.max&&(r.id!=='phoenix'||this.player.rescues<5)&&(r.minSector||0)<=this.sector);
+ const advanced=minimum==='epic'&&this.rng.next()<.1?this.rng.pick(eligible.filter(r=>r.highOnly)):null;
+ const weighted=eligible.filter(r=>!r.highOnly).map(r=>{const w=(minimum==='epic'?{common:0,rare:1,epic:5,legendary:2}:{common:8,rare:5,epic:2,legendary:.6})[r.rarity];return{r,key:w>0?-Math.log(Math.max(.00001,this.rng.next()))/w:Infinity};}).filter(v=>Number.isFinite(v.key)).sort((a,b)=>a.key-b.key).slice(0,n-(advanced?1:0)).map(v=>({type:'relic',id:v.r.id}));
+ if(advanced)weighted.unshift({type:'relic',id:advanced.id});return weighted;
  }
- offerLevel(){this.pendingLevels--;this.mode='choice';this.rewardKind='level';this.choices=this.relicChoices();if(!this.choices.length){this.choices=[{type:'heal',amount:60},{type:'coins',amount:100}];}this.emit('choice');}
+ trainingChoices(){return[{type:'training',stat:'power'},{type:'training',stat:'hull'},{type:'coins',amount:75+this.sector*5}];}
+ applyTraining(stat){if(!['power','hull'].includes(stat))return false;this.training[stat]++;if(stat==='hull'){this.player.maxHp+=2;this.heal(2);}return true;}
+ get repairCost(){return Math.round(Math.min(9e12,40*(1+this.sector*.1+this.sector**2*.035)*Math.pow(1.12,this.repairPurchases)*Math.pow(1.12,Math.max(0,this.sector-15))));}
+ get rescueCost(){return Math.round(Math.min(9e12,190*(1+this.sector*.08+this.sector**2*.025)*Math.pow(1.2,this.rescuePurchases)*Math.pow(1.15,Math.max(0,this.sector-15))));}
+ get trainingCost(){return Math.round(Math.min(9e12,(120+this.sector*7)*Math.pow(1.18,this.trainingPurchases)));}
+ get salvageValue(){return 20+Math.min(200,this.sector*8);}
+ sanitizeShop(shop=this.shop){if(!shop)return;for(const it of shop.items){if(it.type==='relic'&&this.count(it.relic)>=(RELICS.find(r=>r.id===it.relic)?.max||0))Object.assign(it,{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,sold:false,relic:null});if(it.type==='forge'&&this.forgeLevel>=20)Object.assign(it,{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,sold:false});}shop.items=shop.items.filter(it=>it.type!=='training'||!shop.items.some(other=>other!==it&&other.type==='training'&&other.stat===it.stat&&['training','hullTraining'].includes(other.id)));}
+ offerLevel(){this.pendingLevels--;this.mode='choice';this.rewardKind='level';this.choices=this.relicChoices();if(!this.choices.length){this.choices=this.trainingChoices();}else if(this.choices.length<3)this.choices.push(...this.trainingChoices().slice(0,3-this.choices.length));this.emit('choice');}
  choose(i){
  if(this.mode!=='choice'||!this.choices[i])return false;const c=this.choices[i];
- if(c.type==='relic')this.addRelic(c.id);if(c.type==='weapon'){this.weapon=c.weapon;this.stats.rareFinds+=['epic','legendary','ancient','mythic'].includes(c.weapon.rarity)?1:0;}
+ if(c.type==='relic'&&!this.addRelic(c.id))return false;if(c.type==='training')this.applyTraining(c.stat);if(c.type==='weapon'){this.weapon=c.weapon;this.stats.rareFinds+=['epic','legendary','ancient','mythic'].includes(c.weapon.rarity)?1:0;}
  if(c.type==='heal')this.heal(c.amount);if(c.type==='experience')this.gainXP(c.amount);if(c.type==='rescue')this.player.rescues=Math.min(5,this.player.rescues+1);if(c.type==='forge')this.forgeLevel=Math.min(20,this.forgeLevel+1);if(c.type==='capacity'){this.player.maxHp+=c.amount;this.heal(c.amount);}if(c.type==='skill'){this.player.dashCD=0;this.player.echoCD=0;this.supplyBoost+=1;}if(c.type==='coins')this.player.coins+=c.amount;
  if(c.type==='route'){this.route=c.id;this.sector++;this.mode='playing';this.choices=[];this.rewardKind='';this.heal(18+this.count('supply')*16+(c.id==='quiet'?20:0));this.setupSector();return true;}
- if(this.rewardKind==='sector'){this.offerRoutes();return true;}
+ if(this.rewardKind==='sector'){this.sectorClaimed=true;if(this.settlementPending)this.nextCollectedChest();else this.offerRoutes();return true;}
  if(this.settlementPending){this.nextCollectedChest();return true;}this.mode='playing';this.choices=[];this.emit('resume');return true;
  }
- skipChoice(){if(this.mode!=='choice'||this.rewardKind!=='chest')return;this.player.coins+=20;if(this.settlementPending){this.nextCollectedChest();return;}this.mode='playing';this.emit('resume');}
- offerRoutes(){this.mode='choice';this.rewardKind='route';this.choices=[{type:'route',id:this.rng.pick(ROUTES).id}];this.emit('choice');}
+ skipChoice(){if(this.mode!=='choice'||!['chest','level','sector'].includes(this.rewardKind))return;this.player.coins+=this.salvageValue;if(this.rewardKind==='sector'){this.sectorClaimed=true;if(this.settlementPending)this.nextCollectedChest();else this.offerRoutes();return;}if(this.settlementPending){this.nextCollectedChest();return;}this.mode='playing';this.choices=[];this.emit('resume');}
+ offerRoutes(){if(this.pendingLevels>0){this.settlementPending=true;this.sectorClaimed=true;this.sectorRewarded=true;this.offerLevel();return;}this.mode='choice';this.rewardKind='route';this.choices=this.pendingRoutes.length?this.pendingRoutes.splice(0):[{type:'route',id:this.rng.pick(ROUTES).id}];this.emit('choice');}
  finishSector(){
  if(this.mode!=='playing'||this.enemies.some(e=>e.hp>0)||this.incursions.length)return;
  if(!this.collectionTime){this.settlementPending=true;this.collectionTime=1.3;this.bullets=[];this.hazards=[];this.echoes=[];this.emit('collect');return;}
@@ -170,15 +192,16 @@ export class Game{
  this.collectedChests.push(...this.chests);this.chests=[];this.nextCollectedChest();
  }
  nextCollectedChest(){
- const c=this.collectedChests.shift();if(c){this.mode='choice';this.rewardKind='chest';this.rewardSource=`清场自动拾取 · ${c.type==='relic'?'黄金物资箱':'物资箱'}奖励${this.collectedChests.length?`（还剩 ${this.collectedChests.length} 箱）`:''}`;this.choices=this.chestChoices(c.type==='relic');this.emit('choice');return;}
- this.settlementPending=false;this.completeSectorRewards();
+ if(this.pendingLevels>0){this.offerLevel();return;}if(this.sectorClaimed){this.settlementPending=false;this.offerRoutes();return;}
+ const c=this.collectedChests.shift();if(c){this.mode='choice';this.rewardKind='chest';this.rewardSource=`${c.source?c.source+' · ':''}${c.type==='relic'?'黄金物资箱':'物资箱'}奖励${this.collectedChests.length?`（还剩 ${this.collectedChests.length} 箱）`:''}`;this.choices=this.chestChoices(c.type==='relic');this.emit('choice');return;}
+ this.completeSectorRewards();
  }
  completeSectorRewards(){
- if(this.sector===14&&!this.endless){this.campaignCleared=true;this.mode='won';this.emit('win');return;}
- this.player.coins+=60;this.heal(20);if(this.route==='storm')this.pendingLevels++;
- this.mode='choice';this.rewardKind='sector';this.rewardSource=this.stageBossKills?'击败首领 · 航段清场奖励':'航段清场奖励';this.choices=this.relicChoices(2,this.stageBossKills?'epic':undefined);this.choices.push({type:'weapon',weapon:rollWeapon(this.rng,this.sector+1,this.stageBossKills?'epic':undefined)});if(this.sector>=6)this.choices[1]={type:'weapon',weapon:rollWeapon(this.rng,this.sector+1)};this.emit('choice');
+ if(!this.sectorRewarded){this.sectorRewarded=true;if(this.sector!==14||this.endless){this.player.coins+=60;this.heal(20);if(this.route==='storm')this.pendingLevels++;}}if(this.pendingLevels>0){this.offerLevel();return;}
+ if(this.sector===14&&!this.endless){this.settlementPending=false;this.campaignCleared=true;this.mode='won';this.emit('win');return;}
+ this.mode='choice';this.rewardKind='sector';this.rewardSource=this.stageBossKills?'击败首领 · 航段清场奖励':'航段清场奖励';this.choices=this.relicChoices(2,this.stageBossKills?'epic':undefined);if(!this.choices.length)this.choices=this.trainingChoices().slice(0,2);this.choices.push({type:'weapon',weapon:rollWeapon(this.rng,this.sector+1,this.stageBossKills?'epic':undefined)});while(this.choices.length<3)this.choices.push(this.trainingChoices()[this.choices.length%2]);if(this.sector>=6)this.choices[1]={type:'weapon',weapon:rollWeapon(this.rng,this.sector+1)};this.emit('choice');
  }
- chestChoices(gold=false){const pool=[...this.relicChoices(2,gold?'epic':undefined),{type:'weapon',weapon:rollWeapon(this.rng,this.sector,gold?'legendary':this.rng.next()<.3?'epic':undefined)},{type:'experience',amount:100+this.sector*25},{type:'capacity',amount:20},...(this.forgeLevel<20?[{type:'forge'}]:[]),{type:'skill'},{type:'coins',amount:45+this.rng.int(0,80)}];if(this.player.hp<this.player.maxHp*.75)pool.push({type:'heal',amount:85});if(this.player.rescues<5)pool.push({type:'rescue'});const selected=this.rng.shuffle(pool).slice(0,3);if(this.sector>=6)selected[1]={type:'weapon',weapon:rollWeapon(this.rng,this.sector)};if(gold)selected[0]={type:'weapon',weapon:rollWeapon(this.rng,this.sector,'legendary')};return selected;}
+ chestChoices(gold=false){const relics=this.relicChoices(2,gold?'epic':undefined);const pool=[...relics,...(!relics.length?this.trainingChoices().slice(0,2):[]),{type:'weapon',weapon:rollWeapon(this.rng,this.sector,gold?'legendary':this.rng.next()<.3?'epic':undefined)},{type:'experience',amount:100+this.sector*25},{type:'capacity',amount:this.endless?2:20},...(this.forgeLevel<20?[{type:'forge'}]:[]),{type:'skill'},{type:'coins',amount:45+this.rng.int(0,80)}];if(this.player.hp<this.player.maxHp*.75)pool.push({type:'heal',amount:85});if(this.player.rescues<5)pool.push({type:'rescue'});const selected=this.rng.shuffle(pool).slice(0,3);if(this.sector>=6)selected[1]={type:'weapon',weapon:rollWeapon(this.rng,this.sector)};if(gold)selected[0]={type:'weapon',weapon:rollWeapon(this.rng,this.sector,'legendary')};return selected;}
  tryChest(){
  const c=this.chests.find(c=>dist(c,this.player)<90);if(!c){if(dist(this.player,{x:1100,y:800})<120)this.openShop();return;}
  if(this.player.coins<c.cost){this.emit('toast',{text:`需要 ${c.cost} 枚星币`});return;}
@@ -190,6 +213,7 @@ export class Game{
  const def=ENEMIES[type]||ENEMIES.drifter,p=this.player,angle=this.rng.next()*TAU;
  const mult=1+this.sector*.2+this.sector**2*.05+this.sector**3*.009+Math.max(0,this.sector-14)*.5;const x=clamp(p.x+Math.cos(angle)*this.rng.int(470,660),45,WORLD.w-45),y=clamp(p.y+Math.sin(angle)*this.rng.int(390,570),45,WORLD.h-45);
  const e={id:this.id++,type,x,y,r:def.r,hp:def.hp*mult,maxHp:def.hp*mult,speed:def.speed*(1+Math.min(24,this.sector)*.014)*(this.difficulty==='relaxed'?.9:1),damage:def.damage*(1+this.sector*.025),xp:def.xp,color:def.color,age:0,cd:this.rng.next()*2+1,phase:0,slow:0,burn:0,burnDmg:0,hit:0,vx:0,vy:0,...opts};
+ if(this.endless){e.hp*=endlessPressure(this.sector);e.maxHp*=endlessPressure(this.sector);e.damage*=endlessDamage(this.sector);}
  if(this.route==='storm'&&!opts.boss){e.hp*=1.15;e.maxHp=e.hp;}
  if(dist(e,p)<235&&!opts.x){const away=Math.atan2(WORLD.h/2-p.y,WORLD.w/2-p.x);e.x=clamp(p.x+Math.cos(away)*430,40,2160);e.y=clamp(p.y+Math.sin(away)*430,40,1560);}
  if(!opts.boss&&!opts.elite&&this.sector>0&&this.rng.next()<.12){e.affix=this.rng.pick(['haste','armored','volatile']);if(e.affix==='haste')e.speed*=1.3;if(e.affix==='armored'){e.hp*=1.6;e.maxHp=e.hp;}}
@@ -229,25 +253,26 @@ export class Game{
  this.activeEvent.targets=this.enemies.filter(e=>!before.has(e.id)&&e.hp>0).map(e=>e.id);this.activeEvent.combat=['elite','hunt','convoy','twins','relay','rift','invasion','pincer'].includes(id);
  this.emit('event',{text:EVENT_NAMES[id]});
  }
- makeShop(sale=false){const relic=this.relicChoices(1)[0];return{sale,rerolls:0,rescueBuys:0,items:[{id:'repair',name:'应急修复',desc:'立即恢复 65 生命',cost:40,type:'heal',amount:65},
- {id:'forge',name:'武器校准',desc:'所有武器伤害 +12%，可叠加到 20 级，费用递增',cost:Math.round(75*1.35**this.forgeLevel),type:'forge'},
- {id:'rescue',name:'救援信标',desc:'增加一次满血救援机会',cost:190,type:'rescue'},
- {id:'relic',name:'遗物寄售',cost:sale?200:280,type:'relic',relic:relic?.id,sold:!relic},
- {id:'weapon',name:'珍稀武器',cost:sale?300:420,type:'weapon',weapon:rollWeapon(this.rng,this.sector,this.sector>=6?undefined:this.rng.next()<.12?'legendary':'epic')}]};}
- openShop(){if(this.collectionTime>0)return false;if(!['playing','choice'].includes(this.mode))return false;if(this.mode==='playing'&&dist(this.player,{x:1100,y:800})>120)return false;if(this.mode==='choice'&&this.rewardKind!=='route')return false;this.shopReturn=this.mode;this.mode='shop';this.shopVisits++;this.emit('shop');return true;}
+ makeShop(sale=false){const relic=this.relicChoices(1,this.sector>=9?'epic':undefined)[0];const shop={sale,rerolls:0,rescueBuys:0,items:[{id:'repair',name:'应急修复',desc:'立即恢复 65 生命',cost:this.repairCost,type:'heal',amount:65},
+ {id:'forge',name:'武器校准',desc:'伤害 +12%',cost:Math.round(75*1.35**this.forgeLevel),type:'forge'},
+ {id:'rescue',name:'救援信标',desc:'救援 +1 次',cost:this.rescueCost,type:'rescue'},
+ {id:'relic',name:'遗物寄售',cost:Math.round((sale?200:280)*(1+this.sector*.035)*(relic&&RELICS.find(r=>r.id===relic.id).highOnly?2.2:1)),type:relic?'relic':'training',stat:'power',relic:relic?.id,sold:false,desc:relic?undefined:'伤害 +0.8%'},
+ {id:'weapon',name:'珍稀武器',cost:sale?300:420,type:'weapon',weapon:rollWeapon(this.rng,this.sector,this.sector>=6?undefined:this.rng.next()<.12?'legendary':'epic')},{id:'training',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost,type:'training',stat:'power'},{id:'hullTraining',name:'船体研修',desc:'生命上限 +2',cost:this.trainingCost,type:'training',stat:'hull'}]};if(!relic)Object.assign(shop.items.find(it=>it.id==='relic'),{name:'火力研修',cost:this.trainingCost});if(this.forgeLevel>=20)Object.assign(shop.items.find(it=>it.id==='forge'),{type:'training',stat:'power',name:'火力研修',desc:'伤害 +0.8%',cost:this.trainingCost});this.sanitizeShop(shop);if(this.sector<6)shop.items=shop.items.filter(it=>!['training','hullTraining'].includes(it.id));return shop;}
+ openShop(){if(this.collectionTime>0)return false;if(!['playing','choice'].includes(this.mode))return false;if(this.mode==='playing'&&dist(this.player,{x:1100,y:800})>120)return false;if(this.mode==='choice'&&this.rewardKind!=='route')return false;this.sanitizeShop();this.shopReturn=this.mode;this.mode='shop';this.shopVisits++;this.emit('shop');return true;}
  closeShop(){if(this.mode!=='shop')return;this.mode=this.shopReturn;if(this.mode==='choice')this.emit('choice');else this.emit('resume');}
  buy(id){if(this.mode!=='shop')return false;const it=this.shop.items.find(i=>i.id===id);if(!it||it.sold||this.player.coins<it.cost)return false;
  if(it.type==='heal'&&this.player.hp>=this.player.maxHp)return false;if(it.type==='forge'&&this.forgeLevel>=20)return false;if(it.type==='rescue'&&this.player.rescues>=5)return false;
  if(it.type==='relic'&&!this.addRelic(it.relic))return false;
  this.player.coins-=it.cost;
- if(it.type==='heal'){this.heal(it.amount);it.cost+=15;}
+ if(it.type==='heal'){this.heal(it.amount);this.repairPurchases++;it.cost=this.repairCost;}
  if(it.type==='forge'){this.forgeLevel++;it.cost=Math.round(75*1.35**this.forgeLevel);}
- if(it.type==='rescue'){this.player.rescues++;this.shop.rescueBuys++;it.cost+=100;}
+ if(it.type==='rescue'){this.player.rescues++;this.shop.rescueBuys++;this.rescuePurchases++;it.cost=this.rescueCost;}
+ if(it.type==='training'){this.applyTraining(it.stat);this.trainingPurchases++;for(const item of this.shop.items)if(item.type==='training')item.cost=this.trainingCost;}
  if(it.type==='weapon'){this.weapon=it.weapon;this.stats.rareFinds++;}
  if(['weapon','relic'].includes(it.type))it.sold=true;
- this.emit('sound',{name:'select'});return true;}
+ this.sanitizeShop();this.emit('sound',{name:'select'});return true;}
  rerollShop(){if(this.mode!=='shop')return false;const cost=30+this.shop.rerolls*15;if(this.player.coins<cost)return false;this.player.coins-=cost;const rerolls=this.shop.rerolls+1,old=this.shop;this.shop=this.makeShop(old.sale);this.shop.rerolls=rerolls;this.shop.rescueBuys=old.rescueBuys;for(const id of ['repair','rescue'])this.shop.items.find(i=>i.id===id).cost=old.items.find(i=>i.id===id).cost;return true;}
- rerollReward(){if(this.mode!=='choice'||this.rewardKind!=='level')return false;const cost=25+this.rewardRerolls*15;if(this.player.coins<cost)return false;this.player.coins-=cost;this.rewardRerolls++;this.choices=this.relicChoices();if(!this.choices.length)this.choices=[{type:'heal',amount:60},{type:'coins',amount:100}];this.emit('choice');return true;}
+ rerollReward(){if(this.mode!=='choice'||this.rewardKind!=='level')return false;const cost=25+this.rewardRerolls*15;if(this.player.coins<cost)return false;this.player.coins-=cost;this.rewardRerolls++;this.choices=this.relicChoices();if(!this.choices.length)this.choices=this.trainingChoices();this.emit('choice');return true;}
  startEndless(){if(this.mode!=='won'||!this.campaignCleared)return false;this.endless=true;this.resultRecorded=false;this.sector=15;this.mode='playing';this.player.rescues=Math.max(1,this.player.rescues);this.heal(this.player.maxHp);this.setupSector();return true;}
  updateDirector(dt){
  for(const wave of this.incursions){wave.wait-=dt;if(wave.wait<=0&&!wave.spawned){wave.spawned=true;this.waveCount++;for(let i=0;i<wave.count;i++){let x=clamp(wave.x+this.rng.int(-85,85),30,2170),y=clamp(wave.y+this.rng.int(-85,85),30,1570);if(Math.hypot(x-this.player.x,y-this.player.y)<160){const a=Math.atan2(y-this.player.y,x-this.player.x);x=clamp(this.player.x+Math.cos(a)*210,30,2170);y=clamp(this.player.y+Math.sin(a)*210,30,1570);}const e=this.spawnEnemy(wave.type,{x,y});if(e&&this.activeEvent?.serial===wave.eventSerial)this.activeEvent.targets.push(e.id);}}}
@@ -257,19 +282,19 @@ export class Game{
  if(this.clearing)return;
  this.spawnClock-=dt;if(this.spawnClock<=0){const melee=this.composition.filter(t=>!RANGED_TYPES.has(t)),ranged=this.composition.filter(t=>RANGED_TYPES.has(t)),pool=['drifter','skitter',...melee,...melee,...melee];if(ranged.length&&this.rng.next()<(this.sector<3?.18:.25))pool.splice(0,pool.length,...ranged);if(this.sector===0&&this.time<8)pool.splice(2);let count=2+Math.min(4,Math.floor(this.sector/4))+(this.highTide?1:0)+(this.activeEvent?.id==='surge'?2:0);if(this.boss)count=Math.max(1,Math.floor(count/2));for(let i=0;i<count;i++)this.spawnEnemy(this.rng.pick(pool));this.spawnClock=(this.boss?2.6:1.22)*(this.route==='quiet'?1.12:1)*(this.difficulty==='relaxed'?1.2:1)/.7;}
  }
- dash(input){const p=this.player;if(p.dashCD>0)return false;let x=input.mx,y=input.my;let l=Math.hypot(x,y);if(l<.1){x=Math.cos(p.angle);y=Math.sin(p.angle);l=1;}p.dx=x/l;p.dy=y/l;p.dashTime=.2;p.invuln=Math.max(p.invuln,.42);p.dashCD=this.dashMax;this.stats.dashes++;this.emit('sound',{name:'dash'});return true;}
+ dash(input){const p=this.player;if(p.dashCD>0)return false;let x=input.mx,y=input.my;let l=Math.hypot(x,y);if(l<.1){x=Math.cos(p.angle);y=Math.sin(p.angle);l=1;}p.dx=x/l;p.dy=y/l;p.dashTime=.2;p.invuln=Math.max(p.invuln,.42+this.count('sundial')*.08);p.dashCD=this.dashMax;this.stats.dashes++;this.emit('sound',{name:'dash'});return true;}
  summonEcho(){
  const p=this.player;if(p.echoCD>0)return false;p.echoCD=this.echoMax;const n=1+this.count('binary');
  const recorded=this.history.map(h=>({...h}));for(let i=0;i<n;i++)this.echoes.push({x:p.x,y:p.y,originX:p.x+(i===1?55:0),originY:p.y,life:6+this.count('echo')*2,age:0,recorded,shotCD:0,angle:p.angle});
- this.stats.echoes++;this.heal(this.count('echoheart')*15);this.emit('sound',{name:'echo'});this.emit('toast',{text:'余响上线 · 复刻移动轨迹 · 自主锁定敌人射击'});return true;
+ this.stats.echoes++;this.heal(this.count('echoheart')*15);this.emit('sound',{name:'echo'});this.emit('toast',{text:'分身已召唤'});return true;
  }
  fire(x,y,angle,echo=false,scale=1){
  if(this.bullets.length>550)return;
- const w=weaponInfo(this.weapon),crit=this.rng.next()<.08+this.count('glass')*.12+(this.weapon.mod==='lucky'?.12:0);const dmg=w.damage*this.damageMult*(crit?2:1)*scale*(echo?(.55+this.count('binary')*.2+(this.weapon.mod==='echo'?.25:0)):1);
+ const w=weaponInfo(this.weapon),crit=this.rng.next()<.08+this.count('glass')*.12+(this.weapon.mod==='lucky'?.12:0);const dmg=w.damage*this.damageMult*(crit?2:1)*scale*(echo?(.55+this.count('binary')*.2+(this.weapon.mod==='echo'?.25:0)+this.count('afterimage')*.12):1);
  if(w.beam){for(let i=0;i<w.count;i++){const offset=(i-(w.count-1)/2)*14,sx=x-Math.sin(angle)*offset,sy=y+Math.cos(angle)*offset,tx=sx+Math.cos(angle)*w.beam,ty=sy+Math.sin(angle)*w.beam;this.emit('beam',{x:sx,y:sy,tx,ty,color:w.el.color,width:w.radius});for(const e of [...this.enemies])if(e.hp>0&&segmentDistance(e.x,e.y,sx,sy,tx,ty)<e.r+w.radius){this.hitEnemy(e,dmg,{element:w.el.id,crit});this.emit('hit',{x:e.x,y:e.y,color:w.el.color,crit});}}if(!echo){this.shots++;this.emit('sound',{name:'shoot',frame:w.id});if(this.count('triad')&&this.shots%3===0)for(let i=0;i<8;i++){const a=i*TAU/8;this.bullets.push({id:this.id++,x,y,px:x,py:y,vx:Math.cos(a)*480,vy:Math.sin(a)*480,r:4,damage:dmg*.45,life:.9,age:0,pierce:0,hitIds:[],element:w.el.id,color:w.el.color});}}return;}
  for(let i=0;i<w.count;i++){
  let a=angle+(w.id==='nova'?i*TAU/w.count:(i-(w.count-1)/2)*w.spread)+(this.rng.next()-.5)*(w.count===1?w.spread*2:.025);
- this.bullets.push({id:this.id++,x:x+Math.cos(a)*25,y:y+Math.sin(a)*25,px:x,py:y,vx:Math.cos(a)*w.speed,vy:Math.sin(a)*w.speed,r:w.radius,damage:dmg,life:w.life,age:0,pierce:(w.pierce||0)+this.count('pierce'),hitIds:[],element:w.el.id,color:echo?'#94b4f0':w.el.color,homing:w.homing||0,blast:w.blast||0,weave:w.weave||0,accel:w.accel||0,mine:!!w.mine,shatter:!!w.shatter,baseAngle:a,boomerang:!!w.boomerang,ricochet:this.weapon.mod==='ricochet',crit,echo});
+ this.bullets.push({id:this.id++,x:x+Math.cos(a)*25,y:y+Math.sin(a)*25,px:x,py:y,vx:Math.cos(a)*w.speed*(1+this.count('harpoon')*.08),vy:Math.sin(a)*w.speed*(1+this.count('harpoon')*.08),r:w.radius,damage:dmg,life:w.life,age:0,pierce:(w.pierce||0)+this.count('pierce'),hitIds:[],element:w.el.id,color:echo?'#94b4f0':w.el.color,homing:w.homing||0,blast:w.blast||0,weave:w.weave||0,accel:w.accel||0,mine:!!w.mine,shatter:!!w.shatter,baseAngle:a,boomerang:!!w.boomerang,ricochet:this.weapon.mod==='ricochet',crit,echo});
  }
  if(!echo){this.shots++;this.emit('sound',{name:'shoot',frame:w.id});if(this.count('triad')&&this.shots%3===0){for(let i=0;i<8;i++){let a=i*TAU/8;this.bullets.push({id:this.id++,x,y,px:x,py:y,vx:Math.cos(a)*480,vy:Math.sin(a)*480,r:4,damage:dmg*.45,life:.9,age:0,pierce:0,hitIds:[],element:w.el.id,color:w.el.color});}}}
  }
@@ -283,7 +308,7 @@ export class Game{
  return true;
  }
  hitEnemy(e,damage,b={}){
- if(e.hp<=0)return;e.hp-=damage*((e.boss||e.elite)?1+this.count('focus')*.3:1);e.hit=.09;this.totalDamage+=damage;
+ if(e.hp<=0)return;const actual=damage*((e.boss||e.elite)?1+this.count('focus')*.3+this.count('leviathan')*.18:1);this.totalDamage+=Math.min(e.hp,actual);e.hp-=actual;e.hit=.14;if(b.crit)this.heal(this.count('siphon')*.8);
  if(b.element==='frost'||(this.count('frost')&&this.rng.next()<.25*this.count('frost')))e.slow=2;
  if(b.element==='fire'||this.count('fire')){e.burn=2.4;e.burnDmg=8*this.count('fire')+(b.element==='fire'?12:0);}
  if(b.element==='void'&&!e.boss){e.x+=(this.player.x-e.x)*.02;e.y+=(this.player.y-e.y)*.02;}
@@ -300,7 +325,7 @@ export class Game{
  if(!noProc&&this.count('blast')&&this.rng.next()<.25*this.count('blast'))this.explode(e.x,e.y,85,24*this.damageMult);
  if(e.elite){this.player.coins+=120+this.sector*8;this.emit('toast',{text:'悬赏完成 · 获得星币与传说宝箱'});}if(e.elite)this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0});
  if(e.type==='splitter'){for(let i=0;i<3;i++)this.spawnEnemy('skitter',{x:e.x+Math.cos(i*TAU/3)*30,y:e.y+Math.sin(i*TAU/3)*30,hp:22,maxHp:22,r:11});}if(e.affix==='volatile')this.hazards.push({id:this.id++,type:'circle',x:e.x,y:e.y,r:65,wait:.8,life:.25,damage:15,fired:false});
- if(e.specialType){this.player.coins+=50+this.sector*5;if(['treasurer','rift','twin'].includes(e.specialType))this.chests.push({id:this.id++,x:e.x,y:e.y,type:this.rng.next()<.45?'relic':'supply',cost:0});}if(e.boss){(this.stats.bossFights??=[]).push({sector:this.sector,kind:e.bossKind,special:!!e.special,seconds:Math.round(e.age*10)/10});this.bossKills++;if(!e.special){this.stageBossKills++;this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0});}this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'灯塔重燃 · 航线已恢复'});if(this.bossSpawned&&this.stageBossKills>=this.stageBossTarget)this.time=Math.max(this.time,this.duration);if(this.clearing&&(this.stageBossTarget===0||this.bossSpawned)&&!this.enemies.some(v=>v.hp>0)&&!this.incursions.length)this.finishSector();}
+ if(e.specialType){this.player.coins+=50+this.sector*5;if(['treasurer','rift','twin'].includes(e.specialType))this.chests.push({id:this.id++,x:e.x,y:e.y,type:this.rng.next()<.45?'relic':'supply',cost:0});}if(e.boss){(this.stats.bossFights??=[]).push({sector:this.sector,kind:e.bossKind,special:!!e.special,seconds:Math.round(e.age*10)/10});this.bossKills++;if(this.count('phoenixcore'))this.player.rescues=Math.min(5,this.player.rescues+1);if(!e.special){this.stageBossKills++;this.chests.push({id:this.id++,x:e.x,y:e.y,type:'relic',cost:0,source:'首领掉落'});}this.gainXP(120);this.player.coins+=100;this.emit('toast',{text:'首领已击败'});if(this.bossSpawned&&this.stageBossKills>=this.stageBossTarget)this.time=Math.max(this.time,this.duration);if(this.clearing&&(this.stageBossTarget===0||this.bossSpawned)&&!this.enemies.some(v=>v.hp>0)&&!this.incursions.length)this.finishSector();}
  }
  explode(x,y,r,damage){this.emit('burst',{x,y,color:'#efc19a',r});for(const e of [...this.enemies])if(e.hp>0&&Math.hypot(e.x-x,e.y-y)<r+e.r)this.hitEnemy(e,damage,{noProc:true});}
  updateEnemy(e,dt){
@@ -408,7 +433,7 @@ export class Game{
  this.hazards=this.hazards.filter(h=>h.life>0);if(this.mode!=='playing')return;
  for(const item of this.pickups){item.age+=dt;let d=dist(item,p),range=170+this.count('magnet')*65;if(d<range||item.age>24){item.x+=(p.x-item.x)/Math.max(1,d)*(310+item.age*5)*dt;item.y+=(p.y-item.y)/Math.max(1,d)*(310+item.age*5)*dt;}if(d<26){if(item.kind==='xp')this.gainXP(item.value);if(item.kind==='heal')this.heal(item.value);if(item.kind==='coin')p.coins+=Math.round(item.value*(1+this.count('luck')*.25)*(this.route==='treasure'?1.5:1));item.taken=true;}}
  this.pickups=this.pickups.filter(i=>!i.taken);if(this.pickups.length>220){let excess=this.pickups.splice(0,this.pickups.length-220);for(const i of excess){if(i.kind==='xp')this.gainXP(i.value);if(i.kind==='coin')p.coins+=i.value;}}
- for(const b of this.beacons)if(!b.done&&dist(b,p)<105){b.charge+=dt*(this.route==='echo'?1.5:1);if(b.charge>=BEACON_SECONDS){b.done=true;this.stats.beacons++;this.gainXP(35+this.sector*4);p.coins+=25;this.heal(b.temporary?40:18);if(!b.temporary){const roll=this.rng.next();this.player.coins+=this.rng.int(15,60);if(roll<.45)this.chests.push({id:this.id++,x:b.x+50,y:b.y,type:roll<.12?'relic':'supply',cost:0});if(this.beacons.filter(v=>!v.temporary).every(v=>v.done)&&!this.beaconRewarded){this.beaconRewarded=true;this.chests.push({id:this.id++,x:b.x+65,y:b.y,type:'relic',cost:0});this.player.coins+=100;this.gainXP(150+this.sector*20);if(this.rng.next()<.35&&!this.activeEvent?.combat)this.startEvent('rift');else this.chests.push({id:this.id++,x:b.x-65,y:b.y,type:'supply',cost:0});}}this.emit('beacon',{x:b.x,y:b.y});this.emit('toast',{text:'信标点亮 · 获得星币、经验与修复；点亮全部信标可获金箱、星币与随机奇遇'});this.emit('sound',{name:'beacon'});}}
+ for(const b of this.beacons)if(!b.done&&dist(b,p)<105){b.charge+=dt*(this.route==='echo'?1.5:1);if(b.charge>=BEACON_SECONDS){b.done=true;this.stats.beacons++;this.gainXP(35+this.sector*4);p.coins+=25;this.heal(b.temporary?40:18);if(!b.temporary){const roll=this.rng.next();this.player.coins+=this.rng.int(15,60);if(roll<.45)this.chests.push({id:this.id++,x:b.x+50,y:b.y,type:roll<.12?'relic':'supply',cost:0});if(this.beacons.filter(v=>!v.temporary).every(v=>v.done)&&!this.beaconRewarded){this.beaconRewarded=true;this.chests.push({id:this.id++,x:b.x+65,y:b.y,type:'relic',cost:0});this.player.coins+=100;this.gainXP(150+this.sector*20);if(this.rng.next()<.35&&!this.activeEvent?.combat)this.startEvent('rift');else this.chests.push({id:this.id++,x:b.x-65,y:b.y,type:'supply',cost:0});}}this.emit('beacon',{x:b.x,y:b.y});this.emit('toast',{text:'航标已占领'});this.emit('sound',{name:'beacon'});}}
  this.satelliteClock-=dt;if(this.count('orbit')&&this.satelliteClock<=0){for(let i=0;i<this.count('orbit');i++){let a=this.elapsed*1.7+i*TAU/this.count('orbit'),x=p.x+Math.cos(a)*55,y=p.y+Math.sin(a)*55;let t=this.enemies.filter(e=>dist(e,p)<500).sort((a,b)=>dist(a,p)-dist(b,p))[0];if(t){this.bullets.push({id:this.id++,x,y,px:x,py:y,vx:Math.cos(Math.atan2(t.y-y,t.x-x))*620,vy:Math.sin(Math.atan2(t.y-y,t.x-x))*620,r:4,damage:20*this.damageMult,life:1,age:0,pierce:0,hitIds:[],element:'plain',color:'#f0dca7'});}}this.satelliteClock=.65;}
  this.blackholeClock-=dt;if(this.count('blackhole')&&this.blackholeClock<=0){const t=this.enemies.find(e=>dist(e,p)<550);if(t){this.explode(t.x,t.y,200,95*this.damageMult);for(const e of this.enemies)if(!e.boss&&dist(e,t)<250){e.x+=(t.x-e.x)*.55;e.y+=(t.y-e.y)*.55;}}this.blackholeClock=8;}
  if(this.stageBossTarget>0&&!this.bossSpawned&&this.time>=this.duration*.35)this.spawnBoss();
@@ -417,10 +442,11 @@ export class Game{
  }
  snapshot(){const o={};for(const k of Object.keys(this))if(!['events','effects','history'].includes(k))o[k]=this[k];o.rng={state:this.rng.state};return JSON.parse(JSON.stringify({version:VERSION,...o}));}
  static restore(data){
- if(!data||![2,3,4,VERSION].includes(data.version)||!Number.isInteger(data.sector)||data.sector<0||data.sector>100000||!data.player||!Number.isFinite(data.player.hp)||!data.weapon||!FRAMES.some(f=>f.id===data.weapon.frame)||!RARITIES[data.weapon.rarity]||!['playing','choice','shop','won','dead'].includes(data.mode))throw new Error('存档格式不兼容或已损坏');
+ if(!data||![2,3,4,5,VERSION].includes(data.version)||!Number.isInteger(data.sector)||data.sector<0||data.sector>100000||!data.player||!Number.isFinite(data.player.hp)||!data.weapon||!FRAMES.some(f=>f.id===data.weapon.frame)||!RARITIES[data.weapon.rarity]||!['playing','choice','shop','won','dead'].includes(data.mode))throw new Error('存档格式不兼容或已损坏');
  for(const key of ['enemies','bullets','pickups','hazards','echoes','beacons','chests','choices'])if(!Array.isArray(data[key]))throw new Error('存档缺少场景数据');
  if(!data.rng||!Number.isFinite(data.rng.state)||!Number.isFinite(data.time)||!Number.isFinite(data.elapsed)||!Number.isFinite(data.player.x)||!Number.isFinite(data.player.y)||!Number.isFinite(data.player.maxHp)||data.player.maxHp<=0||!data.relics||Object.entries(data.relics).some(([id,n])=>!RELICS.some(r=>r.id===id&&Number.isInteger(n)&&n>=0&&n<=r.max)))throw new Error('存档状态无效');
- const g=new Game(data.seed,data.difficulty);for(const k of Object.keys(g))if(k in data&&!['events','effects','history','rng'].includes(k))g[k]=data[k];g.rng=new RNG(1);g.rng.state=data.rng.state>>>0;g.events=[];g.effects=[];g.history=[];if(g.collectionTime>0)g.settlementPending=true;if(data.version<4){g.duration=sectorDuration(g.sector);if(g.activeEvent){g.activeEvent.targets=g.enemies.filter(e=>e.elite).map(e=>e.id);g.activeEvent.serial=++g.eventSerial;g.activeEvent.combat=g.activeEvent.targets.length>0;for(const wave of g.incursions)wave.eventSerial=g.activeEvent.serial;}if(g.rewardKind==='route'&&g.choices.length>1)g.choices=[g.rng.pick(g.choices)];if(g.shop)for(const item of g.shop.items){if(item.id==='weapon')item.cost=Math.max(item.cost,420);if(item.id==='relic')item.cost=Math.max(item.cost,280);}if(g.bossSpawned&&g.bosses.length===1&&g.stageBossTarget>1)for(let i=1;i<g.stageBossTarget;i++)g.spawnGuardian((g.boss.bossKind+i)%5,i,g.stageBossTarget);if(g.bossSpawned&&!g.bosses.length)g.stageBossKills=g.stageBossTarget;}if(data.version<5&&g.sector>=6)for(const e of g.enemies)if(e.boss){e.hp*=.65;e.maxHp*=.65;e.damage=28+Math.min(24,g.sector)*2;}return g;
+ if('training' in data&&(!data.training||!['power','hull'].every(k=>Number.isSafeInteger(data.training[k])&&data.training[k]>=0)))throw new Error('研修存档无效');
+ const g=new Game(data.seed,data.difficulty);for(const k of Object.keys(g))if(k in data&&!['events','effects','history','rng'].includes(k))g[k]=data[k];g.rng=new RNG(1);g.rng.state=data.rng.state>>>0;g.events=[];g.effects=[];g.history=[];if(g.collectionTime>0)g.settlementPending=true;if(data.version<4){g.duration=sectorDuration(g.sector);if(g.activeEvent){g.activeEvent.targets=g.enemies.filter(e=>e.elite).map(e=>e.id);g.activeEvent.serial=++g.eventSerial;g.activeEvent.combat=g.activeEvent.targets.length>0;for(const wave of g.incursions)wave.eventSerial=g.activeEvent.serial;}if(g.rewardKind==='route'&&g.choices.length>1)g.choices=[g.rng.pick(g.choices)];if(g.shop)for(const item of g.shop.items){if(item.id==='weapon')item.cost=Math.max(item.cost,420);if(item.id==='relic')item.cost=Math.max(item.cost,280);}if(g.bossSpawned&&g.bosses.length===1&&g.stageBossTarget>1)for(let i=1;i<g.stageBossTarget;i++)g.spawnGuardian((g.boss.bossKind+i)%5,i,g.stageBossTarget);if(g.bossSpawned&&!g.bosses.length)g.stageBossKills=g.stageBossTarget;}if(data.version<5&&g.sector>=6)for(const e of g.enemies)if(e.boss){e.hp*=.65;e.maxHp*=.65;e.damage=28+Math.min(24,g.sector)*2;}if(data.version<6){if(g.shop)for(const it of g.shop.items){if(it.id==='repair')it.cost=Math.max(it.cost,g.repairCost);if(it.id==='rescue')it.cost=Math.max(it.cost,g.rescueCost);}if(g.rewardKind==='route'&&g.pendingLevels>0){g.pendingRoutes=g.choices;g.settlementPending=true;g.sectorRewarded=true;g.sectorClaimed=true;g.offerLevel();}if(g.mode==='won'&&g.pendingLevels>0){g.settlementPending=true;g.sectorRewarded=true;g.sectorClaimed=false;g.offerLevel();}if(g.endless)for(const e of g.enemies){e.hp*=endlessPressure(g.sector);e.maxHp*=endlessPressure(g.sector);e.damage*=endlessDamage(g.sector);}}g.sanitizeShop();if(g.mode==='choice'&&g.rewardKind!=='route'){g.choices=g.choices.filter(c=>c.type!=='relic'||g.count(c.id)<RELICS.find(r=>r.id===c.id).max);if(!g.choices.length)g.choices=g.trainingChoices();else if(g.choices.length<3)g.choices.push(...g.trainingChoices().slice(0,3-g.choices.length));}return g;
  }
 }
 export function segmentDistance(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;if(!l)return Math.hypot(px-ax,py-ay);const t=clamp(((px-ax)*dx+(py-ay)*dy)/l,0,1);return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));}
