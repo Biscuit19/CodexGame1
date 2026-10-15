@@ -4,9 +4,9 @@
 - 托管：GitHub Pages，发布源 gh-pages 分支的根目录。
 - v6「深海远征」：index.html（由 web.html 原样复制）、完整 assets 目录、.nojekyll、素材署名与许可。
 - 在线入口约 158 KiB，音乐按需加载；完整离线 play.html 约 48.6 MiB，内嵌 23 首音乐和 67 张透明物品图标。
-- 已确认发布提交：4c03f2a；对应游戏源码提交：4730cdc。
+- 已确认发布提交：40e6032；对应游戏源码提交：4cee54b。
 - GitHub Actions pages-build-deployment 状态：Success；确认日期：2026-10-15。
-- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38733426794
+- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38733822718
 
 源码保留在 codex/echo-drift-delivery 分支。更新后运行 npm run build 和相关测试，将 web.html 复制为 gh-pages 根目录的 index.html，同时同步完整 assets（含 icons、music、许可）及署名文件，正常提交并推送即可触发发布。开发用源码入口 index.html 依赖开发服务器；play.html 用于离线游玩，web.html 用于在线按需加载资源。
 
