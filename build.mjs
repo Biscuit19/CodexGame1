@@ -6,7 +6,7 @@ const css=await read('src/style.css');
 const assets={};
 for(const dir of ['music'])for(const file of await readdir(new URL('assets/'+dir+'/',base))){const path='assets/'+dir+'/'+file;const data=await readFile(new URL(path,base));assets[path]=`data:${file.endsWith('.svg')?'image/svg+xml':'audio/mpeg'};base64,${data.toString('base64')}`;}
 let js='';
-for(const path of ['src/assets.js','src/music.js','src/core.js','src/render.js','src/app.js'])js+='\n'+(await read(path)).replace(/^import .*?;\s*$/gm,'').replace(/^export /gm,'');
+for(const path of ['src/saves.js','src/assets.js','src/music.js','src/core.js','src/render.js','src/app.js'])js+='\n'+(await read(path)).replace(/^import .*?;\s*$/gm,'').replace(/^export /gm,'');
 const manifest=`<script>globalThis.__ECHO_ASSETS__=${JSON.stringify(assets)};</script>`;
 const styled=html.replace('<link rel="stylesheet" href="/src/style.css">',`<style>${css}</style>`);
 const bundled=`<script type="module">\n${js.replaceAll('</script','<\\/script')}\n</script>`;

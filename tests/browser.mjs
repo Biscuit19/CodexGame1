@@ -7,7 +7,7 @@ const page=await browser.newPage({viewport:{width:1440,height:900}});
 const errors=[];page.on('pageerror',e=>errors.push(e.stack));
 try{
  await page.goto('http://127.0.0.1:4173/?test=1');await page.locator('h1').waitFor();await page.evaluate(()=>window.__ECHO__.renderer.ready);await page.screenshot({path:'test-results/title.png'});
- await page.click('[data-action="new"]');await page.click('[data-action="start"]');await page.click('[data-action="begin"]');
+ await page.click('[data-action="new"]');await page.locator('[data-create]').first().click();await page.click('[data-action="start"]');await page.click('[data-action="begin"]');
  await page.waitForFunction(()=>window.__ECHO__.game.time>.3);await page.waitForFunction(()=>{const m=window.__ECHO__.soundtrack;return m.current.startsWith('early')&&m.channels.get(m.current)?.currentTime>.1;});assert.equal(await page.evaluate(()=>typeof window.__ECHO__.renderer.bossRig),'function');assert((await page.locator('#objective').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)))>=18);
  const initial=await page.evaluate(()=>window.__ECHO__.game.player.x);
  await page.keyboard.down('KeyD');await page.waitForTimeout(500);await page.keyboard.up('KeyD');assert((await page.evaluate(()=>window.__ECHO__.game.player.x))>initial+50);
@@ -30,6 +30,6 @@ try{
   await page.waitForSelector('[data-choice="0"]');await page.click('[data-choice="0"]');await page.waitForFunction(()=>window.__ECHO__.game.rewardKind==='route');await page.click('[data-choice="0"]');
  }
  await page.waitForFunction(()=>window.__ECHO__.screen==='win');await page.screenshot({path:'test-results/ending.png'});assert.equal(await page.evaluate(()=>localStorage.getItem('echo-drift-save-v2')),null);
- await page.click('[data-action="endless"]');await page.waitForFunction(()=>window.__ECHO__.game.endless);assert.equal(await page.evaluate(()=>window.__ECHO__.game.sector),15);await page.keyboard.press('Escape');await page.click('[data-action="home"]');await page.setViewportSize({width:900,height:640});await page.screenshot({path:'test-results/title-small.png'});assert.equal(await page.locator('[data-action="new"]').isVisible(),true);
+ await page.click('[data-action="endless"]');await page.waitForFunction(()=>window.__ECHO__.game.endless);assert.equal(await page.evaluate(()=>window.__ECHO__.game.sector),15);await page.keyboard.press('Escape');await page.click('[data-action="home"]');await page.setViewportSize({width:900,height:640});await page.screenshot({path:'test-results/title-small.png'});assert.equal(await page.locator('[data-action="slots"]').isVisible(),true);
  assert.deepEqual(errors,[]);console.log('Browser PASS: movement, firing, both skills, pause, relic selection, build, chest, save/reload, bosses, route UI, ending, responsive menu. No JS errors.');
 }finally{await browser.close();}

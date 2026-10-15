@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {SaveSlots} from '../src/saves.js';
+import {Game} from '../src/core.js';
+const memory=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)};};
+test('three independent slots preserve active slot, complete choice state and RNG after restart',()=>{const storage=memory(),s=new SaveSlots(storage);for(let i=0;i<3;i++){s.select(i);const g=new Game(100+i);g.player.coins=100*i;g.offerLevel();s.write(g.snapshot());}const r=new SaveSlots(storage);assert.equal(r.active,2);for(let i=0;i<3;i++){const g=Game.restore(r.read(i));assert.equal(g.seed,100+i);assert.equal(g.player.coins,100*i);assert.equal(g.mode,'choice');}assert.throws(()=>r.select(3));assert.equal(r.slots.length,3);});
+test('legacy automatic save migrates exactly once without overwriting other slots',()=>{const storage=memory(),g=new Game(98);storage.setItem('echo-drift-save-v2',JSON.stringify(g.snapshot()));const s=new SaveSlots(storage);assert.equal(s.read(0).seed,98);assert.equal(storage.getItem('echo-drift-save-v2'),null);s.select(1);s.write(new Game(99).snapshot());const r=new SaveSlots(storage);assert.equal(r.read(0).seed,98);assert.equal(r.read(1).seed,99);assert.equal(r.read(2),null);});
+test('completed campaign slots can resume into endless and death results remain inspectable',()=>{for(const mode of ['won','dead']){const g=new Game(89);g.mode=mode;g.campaignCleared=mode==='won';const s=new SaveSlots(memory());s.write(g.snapshot());const r=Game.restore(s.read());assert.equal(r.mode,mode);if(mode==='won')assert(r.startEndless());}});

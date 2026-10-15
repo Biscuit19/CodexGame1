@@ -4,7 +4,7 @@ const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/b
 try{
  const p=await b.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.stack));
  await p.addInitScript(()=>{if(!localStorage.getItem('echo-v3-tested')){localStorage.setItem('echo-drift-settings-v1',JSON.stringify({volume:.65,musicVolume:.75,music:true}));localStorage.setItem('echo-v3-tested','yes');}});
- await p.goto('http://127.0.0.1:4173/?test=1');await p.click('[data-action="new"]');await p.click('[data-action="start"]');await p.click('[data-action="begin"]');
+ await p.goto('http://127.0.0.1:4173/?test=1');await p.click('[data-action="new"]');await p.locator('[data-create]').first().click();await p.click('[data-action="start"]');await p.click('[data-action="begin"]');
  await p.waitForFunction(()=>window.__ECHO__.soundtrack.channels.get(window.__ECHO__.soundtrack.current)?.currentTime>.2);
  assert.equal(await p.evaluate(()=>window.__ECHO__.settings.musicVolume),.45);
  await p.waitForTimeout(600);assert((await p.evaluate(()=>window.__ECHO__.soundtrack.channels.get(window.__ECHO__.soundtrack.current).volume))<.13);
@@ -15,7 +15,7 @@ try{
  await p.keyboard.press('Escape');await p.reload();await p.click('[data-action="continue"]');await p.click('[data-action="resume"]');assert.equal(await p.evaluate(()=>window.__ECHO__.game.enemies.length),1);
  await p.evaluate(()=>{const a=window.__ECHO__,g=a.game;g.hitEnemy(g.enemies[0],1e9,{noProc:true});g.pendingLevels=0;});await p.waitForFunction(()=>window.__ECHO__.game.rewardKind==='sector');
  for(let k=0;k<5;k++){
-  await p.evaluate(k=>{const a=window.__ECHO__,g=new a.Game(44);g.sector=k*3+2;g.setupSector();g.time=g.duration+5;g.nextEvent=999;g.player.level=50;g.player.invuln=999;g.spawnBoss();g.boss.motionCD=0;g.boss.cd=99;g.player.x=1400;g.player.y=800;a.setGame(g);},k);
+  await p.evaluate(k=>{const a=window.__ECHO__,g=new a.Game(44);g.sector=k*3+2;g.setupSector();g.time=g.duration+5;g.nextEvent=999;g.player.level=50;g.player.invuln=999;g.spawnBoss();g.boss.bossKind=k;g.boss.motionCD=0;g.boss.cd=99;g.player.x=1400;g.player.y=800;a.setGame(g);},k);
   await p.waitForFunction(()=>window.__ECHO__.game.boss.motion==='windup');await p.screenshot({path:`test-results/v3-boss-${k}-windup.png`});
   await p.waitForFunction(()=>window.__ECHO__.game.boss.motion==='strike');await p.waitForTimeout(160);await p.screenshot({path:`test-results/v3-boss-${k}-strike.png`});assert.equal(await p.evaluate(()=>window.__ECHO__.game.mode),'playing');
  }
