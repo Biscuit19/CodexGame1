@@ -1,19 +1,21 @@
 # 在线部署
 
 - 网站：https://biscuit19.github.io/CodexGame1/
-- 版本：**深海远征 / 07（v7）**，旧页面请 Ctrl+F5 刷新。
+- 版本：**深海远征 / 08（v8）**，旧页面请 Ctrl+F5 刷新。
 - 托管：GitHub Pages，发布源为 `gh-pages` 分支根目录。
-- 游戏源码提交：`029a0d5a4069006723cbed4190f43cc686297fb6`，分支 `codex/echo-drift-delivery`。
-- 发布提交：`adadfbbf3ae761fc71d5b78155292b47ef2f3d62`。
+- 游戏源码提交：`abca44a4e2f024d6d6a59bc373837e82c56324d8`，分支 `codex/echo-drift-delivery`。
+- 发布提交：`a9448429b9f713601d53e34c47a837195c7b1716`。
 - GitHub Actions `pages-build-deployment` 状态：**Success**，已于 2026-10-15 确认该提交。
-- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38738759022
+- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38743201235
 
-Pages 的 index.html 与通过测试的 web.html 逐字节一致，完整 assets Git 树与源码一致；包含 43 首音乐、68 张透明图标、署名和许可。在线入口约 168 KiB，音频按需加载。
+Pages 的 index.html 与通过测试的 web.html 逐字节一致，完整 assets Git 树与源码一致；包含 43 首音乐、68 张透明图标、署名和许可。在线入口约 183 KiB，音频按需加载。
 
-完整下载包 `release/echo-drift.zip` 与 `release/余响航线-完整游戏.zip` 内容一致，约 63 MiB。**完整解压，保留 assets 文件夹，再打开包内 play.html。** 包内入口复用 web.html 内联代码，按需读取本地素材，避免把曲库重复塞进压缩包。仓库根目录另有约 85.47 MiB 的全内嵌 play.html 单文件版。两种离线布局均通过射击、音乐、图标及存档验证。
+v8 加大生命显示，商店改为四列，奖励使用紧凑宽布局；五种关卡敌潮、强化后期小怪、随机航标奖励、约每关 2–3 箱、满级遗物替换研修、四项技能强化，以及完整伤害数值与武器 HUD 图标均已集成。92 项核心/存档测试及浏览器流程、五种窗口布局、压力场景与离线验证通过，数值模拟的通关及战败结果如实记录于 TESTING.md。
 
-部署网站不依赖云环境中的服务进程。三个存档槽保存在当前浏览器 localStorage；换浏览器、设备或域名不会自动同步。兼容 v2–v6 存档，旧 15 关通关记录可继续第 16–20 关。
+完整下载包 `release/echo-drift.zip` 与 `release/余响航线-完整游戏.zip` 内容一致，约 63 MiB。**完整解压，保留 assets 文件夹，再打开包内 play.html。** 包内入口复用 web.html 内联代码，读取本地素材；仓库根目录另有约 85.49 MiB 的全内嵌 play.html 单文件版。
 
-更新流程：运行 npm run build 及相关测试，把 web.html 作为 gh-pages/index.html，同时同步完整 assets、README、ASSET_CREDITS 与 LICENSE，正常提交推送触发 Pages。运行 python3 tools/package.py 更新离线包。
+网站不依赖云环境的服务进程。三个存档槽保存在当前浏览器 localStorage；换浏览器、设备或域名不会自动同步。兼容 v2–v7 存档，新技能等级默认为零，保留原有构筑；旧无尽倍率按比例迁移一次。
 
-当前云环境网络策略拦截 github.io 直接请求，因此公开站点的部署结果通过 GitHub Actions Success 确认；相同产物已在 /CodexGame1/ 子路径实际验证加载与游玩。没有声称直接在公开域名完成浏览器验收。验证详情见 TESTING.md。
+更新流程：运行 npm run build 及相关测试，把 web.html 作为 gh-pages/index.html，同时同步完整 assets、README、ASSET_CREDITS 与 LICENSE，正常提交推送触发 Pages；运行 python3 tools/package.py 更新完整包。
+
+云环境网络策略拦截 github.io 直接请求，因此公开站点的发布结果通过 GitHub Actions Success 确认；相同产物已在 /CodexGame1/ 子路径实际验证加载及游玩。没有声称直接在公开域名完成浏览器验收。
