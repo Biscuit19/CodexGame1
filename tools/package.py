@@ -13,10 +13,10 @@ for folder in ['src', 'assets', 'tests', 'tools']:
 archive = out / 'echo-drift.zip'
 with ZipFile(archive, 'w', ZIP_DEFLATED, compresslevel=9) as z:
     for f in sorted(files):
-        z.write(root / f, f)
+        z.write(root / ('web.html' if f == 'play.html' else f), f)
 with ZipFile(archive) as z:
     assert z.testzip() is None
-    assert z.read('play.html') == (root / 'play.html').read_bytes()
-    assert len([n for n in z.namelist() if n.endswith('.mp3')]) == 23
+    assert z.read('play.html') == (root / 'web.html').read_bytes()
+    assert len([n for n in z.namelist() if n.endswith('.mp3')]) == 43
 shutil.copyfile(archive, out / '余响航线-完整游戏.zip')
 print(f'Validated {len(files)} files; each archive {archive.stat().st_size / 1024**2:.2f} MiB')

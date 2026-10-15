@@ -14,4 +14,4 @@ const web=styled.replace('<script type="module" src="/src/app.js"></script>',bun
 html=styled.replace('<script type="module" src="/src/app.js"></script>',manifest+bundled);
 await writeFile(new URL('play.html',base),html);
 await writeFile(new URL('web.html',base),web);
-console.log(`Built offline play.html (${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB) and lazy-music web.html (${Math.round(Buffer.byteLength(web)/1024)} KiB), 23 licensed tracks and ${Object.keys(assets).length-23} illustrated icons.`);
+console.log(`Built offline play.html (${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB) and lazy-music web.html (${Math.round(Buffer.byteLength(web)/1024)} KiB), ${Object.keys(assets).filter(p=>p.endsWith('.mp3')).length} licensed tracks and ${Object.keys(assets).filter(p=>p.endsWith('.svg')).length} illustrated icons.`);

@@ -1,14 +1,12 @@
-# v4 音乐与素材署名
+# v7 音乐与素材署名
 
-## 音乐来源与授权
+## 音乐
 
-23 首完整配乐来自开源策略游戏 **0 A.D. / Wildfire Games**。原作者署名：**Wildfire Games**，官网：https://www.wildfiregames.com/ 。原始音频采用 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)，上游许可声明保存在 `assets/licenses/0ad-audio-LICENSE.txt`。
+43 首完整配乐来自开源策略游戏 **0 A.D. / Wildfire Games**。作者与版权方：Wildfire Games，官网 https://www.wildfiregames.com/ 。原音频采用 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)，上游声明存于 `assets/licenses/0ad-audio-LICENSE.txt`。
 
-这是已实际用于策略与战斗场景的游戏配乐；当前没有可核实的逐曲好评数量，不把知名度或主观风格判断包装成评分。曲目以管弦、节奏和氛围为主，避开旧版轻快平台游戏曲库。
+原有 23 首转为 80 kbps MP3，新增 20 首转为 64 kbps MP3；全部保留完整曲长，统一响度 -19 LUFS / -2 dBTP，未改编旋律。转码及同步视听呈现按 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 共享；原曲保留 3.0 许可。逐文件原地址、时长及 SHA-256 见 `assets/credits.json`。这些是实际游戏原声，无可核实的逐曲好评计数，不标注评分。
 
-所有曲目保留完整长度，转为 80 kbps MP3，并统一到 -19 LUFS / -2 dBTP；未改编旋律。转码版本及与本游戏同步的视听呈现按 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 共享，原曲保留 3.0 许可。逐文件原地址、时长和原文件 SHA-256 在 `assets/credits.json`。
-
-| 使用场景 | 曲目 | 来源 |
+| 场景 | 曲目 | 来源 |
 |---|---|---|
 | 前期随机 | Mediterranean Waves | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Mediterranean_Waves.ogg) |
 | 前期随机 | Elysian Fields | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Elysian_Fields.ogg) |
@@ -30,16 +28,34 @@
 | 首领专用 | Point of No Return | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Point_of_No_Return.ogg) |
 | 首领专用 | Red Dawn | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Red_Dawn.ogg) |
 | 首领专用 | The Governor | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/The_Governor.ogg) |
-| 重大事件专用 | Taiko 1 | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Taiko_1.ogg) |
-| 重大事件专用 | Taiko 2 | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Taiko_2.ogg) |
-| 重大事件专用 | Calm Before the Storm | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Calm_Before_the_Storm.ogg) |
+| 事件专用 | Taiko 1 | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Taiko_1.ogg) |
+| 事件专用 | Taiko 2 | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Taiko_2.ogg) |
+| 事件专用 | Calm Before the Storm | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Calm_Before_the_Storm.ogg) |
+| 前期随机 | Harvest Festival | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Harvest_Festival.ogg) |
+| 前期随机 | Mountain Idyll | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Mountain_Idyll.ogg) |
+| 前期随机 | Along the Nile | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Along_the_Nile.ogg) |
+| 前期随机 | Harvest Moon | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Harvest_Moon.ogg) |
+| 中期随机 | Celtica | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Celtica.ogg) |
+| 中期随机 | Cisalpine Gaul | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Cisalpine_Gaul.ogg) |
+| 中期随机 | Beyond The Indus | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Beyond_The_Indus.ogg) |
+| 中期随机 | The Fledgling Kingdom | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/The_Fledgling_Kingdom.ogg) |
+| 后期随机 | Harsh Lands Rugged People | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Harsh_Lands_Rugged_People.ogg) |
+| 后期随机 | The Hellespont | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/The_Hellespont.ogg) |
+| 后期随机 | The Pillars of Hercules | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/The_Pillars_of_Hercules.ogg) |
+| 后期随机 | Land Between Rivers | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Land_Between_Rivers.ogg) |
+| 首领专用 | Upstart King | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Upstart_King.ogg) |
+| 首领专用 | Juno Protect You | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Juno_Protect_You.ogg) |
+| 首领专用 | In the Shadow of Olympus | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/In_the_Shadow_of_Olympus.ogg) |
+| 首领专用 | Helen Leaves Sparta | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Helen_Leaves_Sparta.ogg) |
+| 首领专用 | Ammon-Ra | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Ammon-Ra.ogg) |
+| 事件专用 | Karmic Confluence | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Karmic_Confluence.ogg) |
+| 事件专用 | Peaks of Atlas | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Peaks_of_Atlas.ogg) |
+| 事件专用 | Eastern Dreams | [原始音频](https://raw.githubusercontent.com/0ad/0ad/master/binaries/data/mods/public/audio/music/Eastern_Dreams.ogg) |
 
-普通曲库共 15 首，分为前中后期三个组。每组抽完再洗牌，避免紧邻重复；航段更换或连续播放约 85 秒时轮换。五种首领各有专用曲目，长战斗可在首领曲库内轮换。重大事件使用另外三首配乐。音乐切换淡入淡出，保留独立音量。
+27 首普通曲分为前、中、后期三个九首组，组内抽完再洗牌。首领曲十首，对应十种首领，长战斗在首领曲池轮换；事件曲六首独立随机。切换时淡入淡出，可单独调音量。
 
-## 原创部分
+## 原创图像与音效
 
-角色、敌人、首领、技能图标和危险标志为本项目 Canvas / SVG 矢量绘制。射击与技能、首领的不同攻击音效通过 Web Audio 合成。程序代码按 MIT 提供，完整许可见 LICENSE。游戏内设置可查看署名。
+`assets/icons/` 下 68 张透明 SVG 为本项目原创，生成源为 `tools/icons.mjs`，按仓库 MIT 许可提供。统一机械海洋风格，遗物按名称描绘，技能为机器人冲刺与分身，18 种武器分别绘制。未复制参考图像的像素或图形。
 
-## v6 原创物品图标
-
-assets/icons/ 下的 67 张透明 SVG 为本项目原创，生成源 tools/icons.mjs，按仓库 MIT 许可提供。采用独立物品轮廓、金属与纸张等材质明暗；没有复制参考图中的像素或图形。角色与命中特效、音效继续由本项目程序绘制/合成。
+角色、17 种敌人、十种动态首领、冰块与命中特效由 Canvas 绘制，射击、受伤、技能及各类首领攻击声音由 Web Audio 合成。代码按 MIT 提供，完整许可见 LICENSE。

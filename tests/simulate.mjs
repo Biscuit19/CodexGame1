@@ -30,5 +30,5 @@ for(const seed of seeds){let g=new Game(seed,process.env.DIFFICULTY||'normal'),s
  }
  if(g.mode==='won'&&bossStart)bossTimes.push(Number((g.elapsed-bossStart).toFixed(1)));
  console.log('RESULT '+JSON.stringify({seed,sector:g.sector+1,mode:g.mode,time:Math.round(g.elapsed),minutes:(g.elapsed/60).toFixed(1),bossTimes,bossFights:g.stats.bossFights,bossKills:g.bossKills,missedBosses:g.missedBosses,forge:g.forgeLevel,coins:g.player.coins,level:g.player.level,kills:g.kills,rescues:g.player.rescues,hits:g.stats.hitsTaken,maxEnemies,maxBullets,restoreCount,relics:g.relics}));
- if(process.env.EXPECT_ENDLESS_LOSS==='1'){assert.equal(g.mode,'dead');assert(g.sector>=18&&g.sector<=25,`Pressure ended outside expected range: ${g.sector+1}`);}else if(g.mode!=='won'&&!(endlessStarted&&g.sector>=endlessUntil))process.exitCode=1;
+ if(process.env.EXPECT_ENDLESS_LOSS==='1'){assert.equal(g.mode,'dead');assert(g.sector>=25&&g.sector<=33,`Pressure ended outside expected range: ${g.sector+1}`);}else if(g.mode!=='won'&&!(endlessStarted&&g.sector>=endlessUntil))process.exitCode=1;
 }
