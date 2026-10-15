@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 const seeds=process.argv.slice(2).map(Number);if(!seeds.length)seeds.push(42,1234,71829);
 const ranking=['heart','lens','orbit','spring','chain','pierce','crown','binary','triad','shell','coat','glass','focus','blast','fire','magnet','echoheart','blackhole','phoenix','tide','boots','supply','echo','frost','capacitor','dash','luck','thorns'];
 function scoreWeapon(w){const i=weaponInfo(w);return i.damage*i.count*i.rate*(i.homing?1.15:1)*(i.blast?1.4:1)*(i.pierce?1.2:1)*(i.count>1?.78:1);}
-for(const seed of seeds){let g=new Game(seed,process.env.DIFFICULTY||'normal'),steps=0,lastSector=-1,bossStart=0,bossTimes=[],maxEnemies=0,maxBullets=0,restoreCount=0;let anchor=null;let endlessStarted=false;const endlessUntil=Number(process.env.ENDLESS_UNTIL||0);
+for(const seed of seeds){let g=new Game(seed,process.env.DIFFICULTY||'normal'),steps=0,lastSector=-1,bossStart=0,bossTimes=[],maxEnemies=0,maxBullets=0,restoreCount=0;let anchor=null;let chestRewards=0;let endlessStarted=false;const endlessUntil=Number(process.env.ENDLESS_UNTIL||0);
  while((g.mode!=='won'||(endlessUntil&&!endlessStarted))&&g.mode!=='dead'&&steps<110000){
   if(g.mode==='won'&&endlessUntil){g.startEndless();endlessStarted=true;lastSector=-1;}
   if(endlessStarted&&g.sector>=endlessUntil)break;
   if(g.mode==='choice'){if(g.rewardKind==='route'){g.openShop();if(g.player.hp<g.player.maxHp-30)g.buy('repair');if(g.player.rescues<2)g.buy('rescue');g.buy('forge');g.buy('relic');const w=g.shop.items.find(i=>i.id==='weapon');if(scoreWeapon(w.weapon)>scoreWeapon(g.weapon)*1.12)g.buy('weapon');g.closeShop();}
    let best=0,bestScore=-Infinity;
-   g.choices.forEach((c,i)=>{let score=0;if(c.type==='relic')score=100-ranking.indexOf(c.id)*2+(g.count(c.id)?-3:0);if(c.type==='weapon')score=scoreWeapon(c.weapon)>scoreWeapon(g.weapon)*1.08?105:0;if(c.type==='heal')score=g.player.hp/g.player.maxHp<.45?130:10;if(c.type==='coins')score=50;if(c.type==='route')score={quiet:100,treasure:70,echo:90,storm:10}[c.id];if(score>bestScore){bestScore=score;best=i;}});g.choose(best);g.drain();continue;
+   g.choices.forEach((c,i)=>{let score=0;if(c.type==='relic')score=100-ranking.indexOf(c.id)*2+(g.count(c.id)?-3:0);if(c.type==='weapon')score=scoreWeapon(c.weapon)>scoreWeapon(g.weapon)*1.08?105:0;if(c.type==='heal')score=g.player.hp/g.player.maxHp<.45?130:10;if(c.type==='coins')score=50;if(c.type==='training')score=35;if(c.type==='skillUpgrade')score=55;if(c.type==='route')score={quiet:100,treasure:70,echo:90,storm:10}[c.id];if(score>bestScore){bestScore=score;best=i;}});if(g.rewardKind==='chest')chestRewards++;g.choose(best);g.drain();continue;
   }
   if(g.sector!==lastSector){if(bossStart){bossTimes.push(Number((g.elapsed-bossStart).toFixed(1)));bossStart=0;}console.log(JSON.stringify({seed,sector:g.sector+1,time:Math.round(g.elapsed),hp:Math.round(g.player.hp),rescues:g.player.rescues,level:g.player.level,kills:g.kills,weapon:g.weapon.frame}));lastSector=g.sector;anchor=null;}
   if(g.boss&&!bossStart)bossStart=g.elapsed;
@@ -29,6 +29,6 @@ for(const seed of seeds){let g=new Game(seed,process.env.DIFFICULTY||'normal'),s
   if(steps%10000===0&&['playing','choice'].includes(g.mode)){g=Game.restore(g.snapshot());restoreCount++;}
  }
  if(g.mode==='won'&&bossStart)bossTimes.push(Number((g.elapsed-bossStart).toFixed(1)));
- console.log('RESULT '+JSON.stringify({seed,sector:g.sector+1,mode:g.mode,time:Math.round(g.elapsed),minutes:(g.elapsed/60).toFixed(1),bossTimes,bossFights:g.stats.bossFights,bossKills:g.bossKills,missedBosses:g.missedBosses,forge:g.forgeLevel,coins:g.player.coins,level:g.player.level,kills:g.kills,rescues:g.player.rescues,hits:g.stats.hitsTaken,maxEnemies,maxBullets,restoreCount,relics:g.relics}));
+ console.log('RESULT '+JSON.stringify({seed,sector:g.sector+1,mode:g.mode,time:Math.round(g.elapsed),minutes:(g.elapsed/60).toFixed(1),bossTimes,bossFights:g.stats.bossFights,chestRewards,cratesPerStage:Number((chestRewards/(g.sector+1)).toFixed(2)),skillUpgrades:g.skillUpgrades,bossKills:g.bossKills,missedBosses:g.missedBosses,forge:g.forgeLevel,coins:g.player.coins,level:g.player.level,kills:g.kills,rescues:g.player.rescues,hits:g.stats.hitsTaken,maxEnemies,maxBullets,restoreCount,relics:g.relics}));
  if(process.env.EXPECT_ENDLESS_LOSS==='1'){assert.equal(g.mode,'dead');assert(g.sector>=25&&g.sector<=33,`Pressure ended outside expected range: ${g.sector+1}`);}else if(g.mode!=='won'&&!(endlessStarted&&g.sector>=endlessUntil))process.exitCode=1;
 }
