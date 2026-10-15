@@ -1,15 +1,19 @@
 # 在线部署
 
 - 网站：https://biscuit19.github.io/CodexGame1/
-- 托管：GitHub Pages，发布源 gh-pages 分支的根目录。
-- v6「深海远征」：index.html（由 web.html 原样复制）、完整 assets 目录、.nojekyll、素材署名与许可。
-- 在线入口约 158 KiB，音乐按需加载；完整离线 play.html 约 48.6 MiB，内嵌 23 首音乐和 67 张透明物品图标。
-- 已确认发布提交：40e6032；对应游戏源码提交：4cee54b。
-- GitHub Actions pages-build-deployment 状态：Success；确认日期：2026-10-15。
-- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38733822718
+- 版本：**深海远征 / 07（v7）**，旧页面请 Ctrl+F5 刷新。
+- 托管：GitHub Pages，发布源为 `gh-pages` 分支根目录。
+- 游戏源码提交：`029a0d5a4069006723cbed4190f43cc686297fb6`，分支 `codex/echo-drift-delivery`。
+- 发布提交：`adadfbbf3ae761fc71d5b78155292b47ef2f3d62`。
+- GitHub Actions `pages-build-deployment` 状态：**Success**，已于 2026-10-15 确认该提交。
+- 部署记录：https://github.com/Biscuit19/CodexGame1/actions/runs/38738759022
 
-源码保留在 codex/echo-drift-delivery 分支。更新后运行 npm run build 和相关测试，将 web.html 复制为 gh-pages 根目录的 index.html，同时同步完整 assets（含 icons、music、许可）及署名文件，正常提交并推送即可触发发布。开发用源码入口 index.html 依赖开发服务器；play.html 用于离线游玩，web.html 用于在线按需加载资源。
+Pages 的 index.html 与通过测试的 web.html 逐字节一致，完整 assets Git 树与源码一致；包含 43 首音乐、68 张透明图标、署名和许可。在线入口约 168 KiB，音频按需加载。
 
-网站不依赖 Codex 内部的 4173 服务进程。三个存档槽保存在当前浏览器 localStorage，退出写入当前槽，旧版单存档迁入槽 1。域名、浏览器或设备不同，存档也不同。旧页面可按 Ctrl+F5 强制刷新，版本应显示「深海远征 / 06」。
+完整下载包 `release/echo-drift.zip` 与 `release/余响航线-完整游戏.zip` 内容一致，约 63 MiB。**完整解压，保留 assets 文件夹，再打开包内 play.html。** 包内入口复用 web.html 内联代码，按需读取本地素材，避免把曲库重复塞进压缩包。仓库根目录另有约 85.47 MiB 的全内嵌 play.html 单文件版。两种离线布局均通过射击、音乐、图标及存档验证。
 
-已验证 Pages 分支的 HTML 和完整 assets 树与测试产物一致。部署成功状态和网址通过 GitHub Actions 页面确认。当前云端网络策略拦截 github.io 的直接请求，因此未直接对公开网址执行浏览器验收；相同发布产物已在 /CodexGame1/ 路径下验证音乐和图标加载，并通过断网离线、浏览器流程、存档、奖励队列及压力测试。详见 TESTING.md。
+部署网站不依赖云环境中的服务进程。三个存档槽保存在当前浏览器 localStorage；换浏览器、设备或域名不会自动同步。兼容 v2–v6 存档，旧 15 关通关记录可继续第 16–20 关。
+
+更新流程：运行 npm run build 及相关测试，把 web.html 作为 gh-pages/index.html，同时同步完整 assets、README、ASSET_CREDITS 与 LICENSE，正常提交推送触发 Pages。运行 python3 tools/package.py 更新离线包。
+
+当前云环境网络策略拦截 github.io 直接请求，因此公开站点的部署结果通过 GitHub Actions Success 确认；相同产物已在 /CodexGame1/ 子路径实际验证加载与游玩。没有声称直接在公开域名完成浏览器验收。验证详情见 TESTING.md。
